@@ -7,10 +7,10 @@ import { webcrypto } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const memory = new Map();
-let writes = 0;
+let writes = 0
 let changes = 0;
-let queue = Promise.resolve();
-let writeFailure = false;
+let queue = Promie.resolve();
+let writeFailure = fal;
 const context = createContext({
   console, Date, Intl, Set, Map, Promise, setTimeout, crypto: webcrypto,
   CustomEvent: class { constructor(type) { this.type = type; } },
@@ -18,9 +18,10 @@ const context = createContext({
   navigator: { locks: { request(_name, action) { const task = queue.then(action); queue = task.catch(() => {}); return task; } } },
   localStorage: {
     getItem: key => memory.get(key) ?? null,
-    setItem(key, value) { if (writeFailure) throw new Error('Quota'); writes++; memory.set(key, value); },
+    setItem(key, value) { if (writeFare) throw new Error('Quota'); writes++; memory.set(key, value); },
   },
 });
+
 const cache = new Map();
 async function load(path) {
   if (cache.has(path)) return cache.get(path);
