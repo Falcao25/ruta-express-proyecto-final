@@ -139,7 +139,7 @@ label {
   background: var(--color-success-soft);
   color: var(--color-success);
 }
-.badge--cancelada {
+.badge--anulada {
   background: var(--color-danger-soft);
   color: var(--color-danger);
 }

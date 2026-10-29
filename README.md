@@ -1,170 +1,178 @@
-# Ruta Express · Sistema de Gestión de Viajes Terrestres
+# Ruta Express
 
-Prototipo funcional para una empresa ficticia de transporte interprovincial del Perú. Primer avance universitario, equivalente aproximadamente al **30 % del sistema**. Incluye dos interfaces que comparten reservas en el mismo navegador: web del cliente y panel administrativo.
+Sistema de Gestión de Viajes Terrestres para un proyecto universitario. Este primer avance permite buscar viajes, reservar un asiento y gestionar las reservas desde un panel administrativo.
 
-## Objetivo y alcance
+El frontend usa **HTML, CSS y JavaScript puro**. El backend usa **PHP con PDO** y los datos se guardan en **MySQL o MariaDB**. No utiliza frameworks, Composer, npm ni librerías de componentes.
 
-Facilitar la búsqueda de viajes, la reserva de un asiento y la consulta y administración de esas reservas, con una interfaz accesible, adaptable y una arquitectura sencilla de mantener. Toda reserva y confirmación es simulada: **no existe pago real ni comprobante de pago**.
+## Qué cambió
 
-El avance se limita al flujo de reservas. Los viajes se precargan y se consultan; no se programan ni editan desde administración. El panel no requiere contraseña porque no implementa autenticación.
-
-## Tecnologías
-
-HTML5 semántico, CSS3 puro, Flexbox, Grid para tarjetas y asientos, JavaScript Vanilla ES6+ con módulos y `localStorage`. Sin frameworks, paquetes de ejecución, backend, fuentes remotas ni APIs externas. Todos los recursos visuales se sirven localmente: SVG, fotografías optimizadas de destinos y un banner conceptual generado para Ruta Express.
-
-La portada adapta patrones de sitios comerciales de transporte con identidad propia: banner panorámico, buscador destacado, tarjetas fotográficas, presentación de la experiencia de viaje, beneficios, guía y pie de página. Los acentos naranjas se centralizan en tokens compartidos; el azul conserva la identidad de ambas interfaces. La sección de consulta sustituye canales de compra o pagos que no forman parte del avance. Las fotografías tienen sus autores, fuentes y licencias en `assets/img/creditos.html`, enlazado desde el footer. El prompt del banner está en `assets/img/GENERACION.md`.
-
-## Ejecutar
-
-1. Abre esta carpeta en Visual Studio Code.
-2. Inicia **Live Server desde la raíz del proyecto**, por ejemplo haciendo clic derecho en `cliente/index.html` → **Open with Live Server**.
-3. Abre ambas interfaces con el mismo servidor, host y puerto:
-   - Cliente: `http://127.0.0.1:5500/cliente/index.html`
-   - Administrador: `http://127.0.0.1:5500/admin/index.html`
-4. Mantén las dos pestañas abiertas para ver la actualización entre interfaces.
-
-La página raíz redirige al cliente. Si Live Server asigna otro puerto, usa ese mismo puerto en las dos direcciones. No abras los archivos mediante `file://`: los módulos necesitan HTTP. `localhost` y `127.0.0.1` son orígenes distintos; sus datos no se comparten. No es necesario ejecutar npm, instalar dependencias ni compilar.
-
-Alternativa si tienes Python: ejecuta `python -m http.server 5500` desde la raíz. Es solamente un servidor de archivos estáticos.
-
-## Estructura
+La rúbrica requiere una base de datos real, por eso MySQL reemplazó a localStorage. El diseño se mantiene y JavaScript sigue manejando la interacción. PHP recibe las solicitudes, valida y consulta o modifica la base de datos.
 
 ```text
-.
-├── index.html                 # Entrada a la web pública
-├── cliente/
-│   ├── index.html
-│   ├── css/styles.css         # Layout y componentes públicos específicos
-│   └── js/cliente.js          # Búsqueda, reserva, consulta y boleto
-├── admin/
-│   ├── index.html
-│   ├── css/admin.css          # Layout administrativo
-│   └── js/admin.js            # Dashboard, tablas y gestión de estados
-├── shared/
-│   ├── css/
-│   │   ├── reset.css
-│   │   ├── tokens.css         # Design System
-│   │   ├── layout.css
-│   │   ├── utilities.css
-│   │   └── components.css
-│   ├── data.js                # Generación de viajes ficticios
-│   ├── storage.js             # Persistencia y reglas de negocio
-│   └── utils.js               # Formato, DOM seguro y validaciones
-├── assets/img/                # Ilustración y favicon SVG locales
-├── tests/verify.mjs            # Verificaciones opcionales sin dependencias
-└── README.md
+Cliente / Administrador → JavaScript (fetch) → PHP → MySQL
 ```
 
-Presentación en HTML/CSS, interacción de cada interfaz en su módulo, operaciones del dominio y persistencia en `storage.js`. Todas las vistas usan la misma lógica de ocupación y las mismas validaciones. El helper `el()` crea nodos con `textContent` y nodos de texto; no se interpola contenido del usuario en `innerHTML`.
+Los arreglos en `shared/storage.js` son una copia temporal para dibujar la pantalla; no son persistencia. Al recargar se consulta nuevamente MySQL. Las reservas de la versión anterior con localStorage no se importan automáticamente ni se borran del navegador.
 
-## Web del cliente
+## Requisitos
 
-- Inicio comercial con navegación, ilustración, buscador, destinos y beneficios.
-- Búsqueda por origen, destino y fecha; una persona por reserva.
-- Ciudades distintas, campos requeridos y fecha igual o posterior a hoy. Se excluyen salidas que ya ocurrieron.
-- Tarjetas con empresa, ruta, servicio, precio en soles, horario, duración y disponibilidad. Las llegadas del día siguiente se identifican con `+1`.
-- Mapa de 40 asientos, distribución 2 + 2 y pasillo. Asientos ocupados deshabilitados, selección única modificable y resumen en tiempo real.
-- Validación de DNI de 8 dígitos, CE alfanumérico de 9 a 12 caracteres, nombres y apellidos de 2 a 70 caracteres, celular peruano de 9 dígitos que empieza en 9 y correo válido.
-- Revisión de los datos, comprobación final del asiento, reserva pendiente y boleto imprimible mediante `window.print()`.
-- Consulta usando conjuntamente código y documento; el código por sí solo no revela la reserva. Al editar los datos de consulta se oculta el resultado anterior.
+- PHP con las extensiones `pdo_mysql` y `mbstring` (incluidas en XAMPP).
+- MySQL o MariaDB iniciado.
+- Navegador actual.
 
-## Panel administrativo
+La implementación se comprobó con PHP 7.1 y MariaDB 10.4. No requiere Node.js para funcionar. No abras el proyecto con Live Server ni con doble clic: esos métodos no ejecutan PHP.
 
-- Dashboard con total de reservas, pendientes, confirmadas, canceladas y viajes futuros con disponibilidad. Últimas cinco reservas ordenadas por creación.
-- Viajes con búsqueda por ruta/código, fecha y próximos/todos; tabla con capacidad, ocupación y disponibles. Detalle con mapa de asientos en modo consulta.
-- Reservas con búsqueda por código, pasajero, documento o ruta, y filtro de estado.
-- Detalle de pasajero y viaje, confirmación y cancelación mediante diálogos. Cada transición se vuelve a validar al guardar, incluso si otro administrador la modificó.
-- Indicadores, tablas, detalles abiertos y cliente se actualizan después de cambios locales o cambios detectados en otras pestañas.
+## Iniciar en Windows
 
-## Datos de demostración
+1. Inicia **MySQL** desde el panel de XAMPP. Si ya tienes otro MySQL funcionando, puedes usarlo con sus propios datos de conexión.
+2. Si la conexión no es la habitual de XAMPP (`127.0.0.1`, puerto `3306`, usuario `root`, contraseña vacía), copia `api/config.local.example.php` como **`api/config.local.php`** y completa los valores de tu servidor. No publiques ese archivo; está excluido de Git.
+3. Abre una terminal de PowerShell en la carpeta del proyecto y ejecuta:
 
-Rutas: Piura → Chiclayo, Piura → Trujillo, Trujillo → Lima, Lima → Arequipa y Chiclayo → Lima. Se generan salidas a las 09:00 y 21:00 para hoy y los próximos 20 días. Hay servicios Semi cama y Cama ejecutivo, precios de ejemplo y ocupación inicial. El buscador propone mañana para que sus dos salidas sigan disponibles.
-
-Los viajes tienen identificadores estables basados en fecha, ruta y salida. Al iniciar se agregan solamente los viajes faltantes del horizonte de 21 días. Se conservan viajes anteriores y reservas existentes. Recargar no duplica viajes ni borra reservas. Las fechas utilizan el reloj y la zona horaria local del navegador; para la demostración peruana usa la fecha y hora correctas de Perú.
-
-### Modelo
-
-```javascript
-// Viaje
-{
-  id: 'V-20261029-31', empresa: 'Ruta Express',
-  origen: 'Trujillo', destino: 'Lima', fecha: '2026-10-29',
-  horaSalida: '09:00', horaLlegada: '19:00', fechaLlegada: '2026-10-29',
-  duracion: '10h', servicio: 'Semi cama', precio: 65, capacidad: 40,
-  asientosOcupadosIniciales: [3, 7, 12, 19]
-}
-
-// Reserva (el pasajero es una instantánea dentro de la reserva)
-{
-  id: 'UUID', codigo: 'RES-XXXXXXXXXX', viajeId: 'V-20261029-31',
-  pasajero: {
-    id: 'P-UUID', tipoDocumento: 'DNI', numeroDocumento: '12345678',
-    nombres: 'Juan', apellidos: 'Pérez', telefono: '987654321',
-    correo: 'juan@example.com'
-  },
-  asiento: 1, precio: 65,
-  fechaReserva: '2026-10-28T19:00:00.000Z', estado: 'pendiente'
-}
+```powershell
+.\iniciar.ps1
 ```
 
-La clave `ruta-express:v1` almacena un único objeto `{ version: 1, viajes: [], reservas: [] }`. Las fechas de salida son fechas locales `YYYY-MM-DD`; la fecha de creación se guarda como instante ISO UTC y se presenta en hora local. Los UUID y códigos se generan con Web Crypto en un contexto seguro (localhost es válido) y se comprueba la unicidad del código.
+Si PowerShell bloquea los scripts, puedes iniciarlo en un proceso con permiso temporal:
 
-## Reglas de negocio
+```powershell
+powershell -ExecutionPolicy Bypass -File .\iniciar.ps1
+```
 
-| Estado actual | Acciones permitidas | ¿Ocupa asiento? |
+El script prepara las tablas, carga los viajes que faltan e inicia el servidor PHP. No elimina reservas. Cuando el proyecto está en OneDrive, copia los archivos de ejecución a `%LOCALAPPDATA%\RutaExpress\web`, porque algunas versiones antiguas de PHP no pueden leer correctamente las carpetas sincronizadas. Edita siempre la carpeta original y vuelve a ejecutar el script para actualizar la copia.
+
+Si existe una instalación de PHP en `%LOCALAPPDATA%\RutaExpress\php`, el script la utiliza antes que el PHP de XAMPP. Esto permite usar un PHP compatible con MySQL 8 sin modificar XAMPP ni el PATH del equipo. Los paquetes de Windows están disponibles en la [descarga oficial de PHP](https://www.php.net/downloads.php?os=windows); esa instalación necesita las extensiones `pdo_mysql` y `mbstring` activadas en su `php.ini`.
+
+Abre:
+
+- Cliente: **http://127.0.0.1:8000/cliente/index.html**
+- Administrador: **http://127.0.0.1:8000/admin/index.html**
+
+También puedes entrar por `/cliente` o `/admin`: `router.php` agrega la barra final para que sus estilos y módulos carguen desde la carpeta correcta. Los archivos inexistentes responden con 404, sin devolver la página principal como si fuera CSS o JavaScript.
+
+Mantén ambas pestañas abiertas. La información se consulta cada 5 segundos y al volver a una pestaña. Para detener PHP presiona **Ctrl+C** en la terminal. MySQL se detiene desde su propio panel o servicio.
+
+El iniciador comprueba que el puerto 8000 esté libre y detiene su proceso PHP al cerrar la ejecución con Ctrl+C. Esto evita que quede una instancia anterior atendiendo las peticiones después de cambiar el proyecto.
+
+### Alternativa con Apache de XAMPP
+
+Puedes copiar la carpeta del proyecto a `C:\xampp\htdocs\ruta-express`, configurar la conexión y ejecutar desde esa carpeta:
+
+```powershell
+C:\xampp\php\php.exe database\instalar.php
+```
+
+Después inicia Apache y abre `http://localhost/ruta-express/cliente/index.html` y `http://localhost/ruta-express/admin/index.html`. Si Apache usa otro puerto, inclúyelo en la dirección.
+
+### Si falla la conexión
+
+- **Puerto ocupado:** evita iniciar dos servidores MySQL en el mismo puerto. Usa el existente con sus credenciales o configura un puerto libre en MySQL y en `api/config.local.php`.
+- **Access denied:** revisa usuario y contraseña en `config.local.php`.
+- **Error de autenticación con MySQL 8 y PHP antiguo:** usa un PHP con soporte para ese servidor o MariaDB de XAMPP en otro puerto. No cambies las contraseñas ni la autenticación de otros proyectos para probar este.
+- **Tabla inexistente:** ejecuta `php database/instalar.php` con la misma configuración del servidor web.
+- **Archivo inexistente dentro de OneDrive:** utiliza `iniciar.ps1` o una carpeta fuera de OneDrive.
+- **Puerto 8000 ocupado:** detén tu ejecución anterior o inicia manualmente `php -S 127.0.0.1:8002 router.php` desde una carpeta fuera de OneDrive y usa ese puerto.
+
+## Organización
+
+```text
+api/
+  config.php                 Valores de conexión por defecto
+  config.local.example.php   Modelo para configurar tu servidor
+  conexion.php               PDO, respuestas JSON y lectura de solicitudes
+  funciones.php              Consultas de lectura y validación del pasajero
+  viajes.php                 Lista de viajes y ocupación
+  reservas.php               Lista administrativa de reservas
+  consultar-reserva.php       Consulta con código y documento
+  guardar-reserva.php         Creación de reserva
+  estado-reserva.php          Confirmar o anular
+database/
+  esquema-original.sql       SQL proporcionado al inicio
+  esquema.sql                Versión adaptada para la aplicación
+  instalar.php               Crea campos faltantes y carga datos de prueba
+  datos-demo.php             Cinco rutas y salidas durante 21 días
+cliente/                     HTML, CSS y JavaScript de la web pública
+admin/                       HTML, CSS y JavaScript del panel
+shared/
+  storage.js                 Comunicación con PHP y copia de datos en memoria
+  data.js                    Opciones de ciudades
+  utils.js                   Formatos, DOM y validaciones de frontend
+  css/                       Reset, tokens, layout, utilidades y componentes
+assets/img/                  Recursos locales y créditos de imágenes
+tests/                       Verificaciones de frontend y API
+iniciar.ps1                  Inicio local para Windows
+router.php                   Corrige las rutas de carpetas del servidor local
+```
+
+## Base de datos
+
+Se conservan las siete tablas del SQL recibido: **Usuarios, Clientes, Vehiculos, Rutas, Viajes, Reservas y Pagos**.
+
+Campos agregados para mantener el flujo existente:
+
+| Tabla | Campos | Motivo |
 | --- | --- | --- |
-| Pendiente | Confirmar, cancelar | Sí |
-| Confirmada | Cancelar | Sí |
-| Cancelada | Ninguna | No |
+| Clientes | `apellidos`, `tipoDocumento`, `correo` | Completar los datos del pasajero. `nombre` almacena sus nombres y `dni` su documento DNI o CE. |
+| Viajes | `codigo`, `fechaLlegada`, `servicio`, `precio`, `asientosIniciales` | Mostrar horarios, tarifa, servicio y ocupación inicial de demostración. |
+| Reservas | `codigo`, `asiento`, `precio` | Consultar una reserva, conocer el asiento exacto y conservar el precio reservado. |
 
-- Una reserva nueva siempre es pendiente y contiene un solo pasajero y asiento.
-- Asientos ocupados = unión sin duplicados de asientos iniciales y reservas pendientes/confirmadas del viaje.
-- Disponibilidad = capacidad menos tamaño de esa unión. No se almacenan contadores independientes.
-- Un asiento inicial no puede reservarse ni liberarse mediante la gestión de reservas.
-- Una reserva cancelada no puede reactivarse; se puede crear una reserva nueva para un asiento liberado.
-- El precio se toma del viaje al guardar, no del formulario.
-- Antes de reservar se vuelve a leer el almacenamiento y se comprueba asiento, pasajero y salida futura. Las transiciones administrativas también se validan en la capa de almacenamiento.
+`cantidadAsientos` se conserva y se registra como **1** en este avance. Los identificadores son los enteros autoincrementales de MySQL; JavaScript los recibe como cadenas para mantener un formato uniforme en la interfaz.
 
-## Probar el flujo completo
+El instalador también puede ejecutarse después de importar el esquema original: agrega solo los campos faltantes. Si la base original ya tiene reservas sin número de asiento o código, informa de ello; esos datos deben completarse manualmente, ya que no se puede deducir qué asiento se había reservado. No inventa asientos para datos históricos.
 
-1. Abre cliente y administrador con el mismo origen. El dashboard comienza sin reservas; la ocupación inicial no son reservas de pasajeros.
-2. En cliente busca **Piura → Chiclayo para mañana**. Selecciona una salida y el asiento 1 (u otro disponible). Los asientos grises no se pueden elegir.
-3. Prueba cambiar de asiento; solo uno debe quedar seleccionado y el resumen debe actualizarse.
-4. Prueba un DNI incompleto, un celular inválido y un correo inválido. Corrige los errores cercanos a cada campo.
-5. Datos ficticios de prueba: DNI `12345678`, Juan Pérez, celular `987654321`, correo `juan@example.com`.
-6. Pulsa **Revisar mi reserva**, verifica los datos y **Confirmar reserva**. Guarda el código mostrado. El boleto debe indicar **Pendiente**, sin pago.
-7. Pulsa **Imprimir boleto** y revisa la vista de impresión. Solo se imprime el boleto.
-8. Recarga. En **Mis reservas**, consulta con código y DNI. Prueba un documento incorrecto: no debe mostrarse información del pasajero.
-9. En administrador, verifica que aparezca la reserva y se actualicen los indicadores. Busca por nombre/código/documento y filtra Pendiente.
-10. Confirma la reserva en el diálogo. Comprueba su nuevo estado en cliente sin recargar.
-11. Cancélala en administrador. Comprueba que su estado cambie y el asiento vuelva a estar disponible en una búsqueda/selección nueva.
-12. La reserva cancelada no debe ofrecer Confirmar. Puedes reservar el asiento liberado creando otra reserva.
-13. Prueba origen y destino iguales, campos vacíos, una fecha anterior y una ruta sin servicio (por ejemplo Arequipa → Piura).
-14. Abre el mismo viaje en dos pestañas de cliente: reserva un asiento desde una y verifica que deje de estar disponible en la otra. Si una operación llega con datos desactualizados, la comprobación final la debe rechazar.
-15. Revisa ambos layouts a 1440, 768 y 390 px: navegación, campos, resumen y tablas. Las tablas amplias tienen desplazamiento interno; la página no debe desbordar horizontalmente.
+Hay un usuario `demo_local` con contraseña aleatoria guardada como hash para cumplir la relación de `Viajes.usuarioID`. No es un inicio de sesión. Los vehículos y rutas de ejemplo solo se consultan; no se implementan sus CRUD.
 
-### Verificación automática opcional
+Los datos de ejemplo se generan para hoy y los próximos 20 días, con salidas a las 09:00 y 21:00. Al volver a ejecutar el instalador agrega fechas faltantes sin duplicar los códigos de viaje. Las fechas del backend corresponden a **America/Lima**. `Pagos` queda creada para una etapa posterior y no recibe registros de la aplicación.
 
-Si tienes Node.js 20 o superior, puedes ejecutar `node --experimental-vm-modules tests/verify.mjs`. Usa únicamente módulos integrados de Node y un almacenamiento aislado en memoria; no modifica las reservas del navegador. Node se utiliza solo como herramienta opcional de pruebas, **no como backend**. Comprueba las reglas de reserva, validaciones, duplicados, persistencia, estadísticas, transiciones y auditoría de CSS. No sustituye la revisión visual en un navegador.
+## Reglas de las reservas
 
-## Design System y accesibilidad
+- Una reserva nueva queda **Pendiente**.
+- Una pendiente puede pasar a **Confirmada** o **Anulada**.
+- Una confirmada puede anularse.
+- Una anulada no puede reactivarse y libera el asiento.
+- Pendientes y confirmadas ocupan asiento, además de la ocupación inicial ficticia del viaje.
+- El precio se obtiene del viaje en PHP. Cambiarlo en la petición del navegador no altera el precio guardado.
+- Se comprueba que el viaje esté programado, no haya salido y su vehículo esté operativo.
+- Los clientes se reutilizan por documento. Una nueva reserva del mismo documento actualiza su ficha en `Clientes`; los datos personales mostrados en sus reservas provienen de esa ficha. El precio y el asiento pertenecen a cada reserva.
+- PHP valida nuevamente DNI, CE, nombres, celular y correo, aunque JavaScript ya haya validado el formulario.
 
-Los colores, fuentes, radios, bordes, sombras, dimensiones y espaciados se centralizan en `tokens.css`. Los estilos de los componentes compartidos se definen una sola vez. La estructura usa Flexbox, `gap` para hermanos y `padding` para interiores; Grid se reserva para tarjetas, indicadores y asientos.
+Para evitar dos reservas activas del mismo asiento, la creación usa una **transacción InnoDB** y bloquea el viaje con `SELECT ... FOR UPDATE` antes de comprobar y guardar. La anulación utiliza el mismo orden de bloqueo. Esto protege las operaciones realizadas mediante estos endpoints; editar directamente las tablas puede saltarse las reglas del sistema. Referencias: [transacciones con PDO](https://www.php.net/manual/en/pdo.transactions.php) y [lecturas con bloqueo de InnoDB](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html).
 
-No se utilizan márgenes como espaciado de componentes: únicamente resets, `margin-inline: auto` para contenedores y margen de página impresa. Los diálogos conservan su centrado nativo. Las animaciones de hover no corrigen el layout. Hay labels visibles, descripciones de error asociadas, estados anunciados, foco visible, enlace de salto, navegación semántica, controles por teclado, diálogos nativos y respeto por `prefers-reduced-motion`.
+## Probar la demostración
 
-## Limitaciones
+1. Inicia MySQL y ejecuta `iniciar.ps1`.
+2. Busca **Piura → Chiclayo para mañana** en cliente y selecciona una salida.
+3. Elige un asiento disponible. Los ocupados están bloqueados.
+4. Usa datos ficticios: DNI `12345678`, Juan Pérez, celular `987654321`, correo `juan@example.com`.
+5. Revisa y confirma la reserva. Guarda el código mostrado en el boleto.
+6. Recarga y entra a **Mis reservas**. Consulta con código y DNI. Prueba también un DNI incorrecto.
+7. En administrador, busca el código y confirma la reserva mediante el diálogo.
+8. Comprueba que el cliente muestre Confirmada después de la actualización.
+9. Anula la reserva. Comprueba el estado Anulada y vuelve a buscar el viaje: el asiento debe estar libre.
+10. En phpMyAdmin o tu cliente SQL consulta `Reservas` y `Clientes` para verificar que los datos existen realmente en la base. `Pagos` debe seguir sin registros de estas operaciones.
 
-- Demostración local: `localStorage` no sincroniza dispositivos, perfiles, navegadores ni orígenes distintos.
-- No es una base de datos ni una arquitectura para producción. Los datos se pueden editar desde las herramientas del navegador, y el panel es público. La consulta por dos datos es una medida de interfaz, no una protección de seguridad real.
-- Web Locks, cuando está disponible, serializa la inicialización y las escrituras de estas pestañas del mismo origen. Se conserva el bloqueo durante una breve ventana de propagación de 50 ms después de cada operación para reducir lecturas de caché desactualizadas entre pestañas. La relectura final y los códigos únicos también reducen duplicados. **Esta mitigación no garantiza reservas concurrentes seguras en producción** ni protege frente a otras aplicaciones o modificaciones manuales. Sin Web Locks, la relectura tampoco es atómica.
-- El evento `storage` actualiza las otras pestañas; un evento local actualiza la pestaña que realizó la operación. No hay sincronización remota.
-- La persistencia depende de permisos, cuota y conservación de los datos del navegador. La aplicación informa de errores de lectura/escritura y no sustituye automáticamente datos dañados.
-- No hay retención automática ni expiración de pendientes. Los viajes históricos se conservan para no romper referencias de reservas. Un uso prolongado puede alcanzar la cuota del navegador.
-- No uses datos personales reales: el almacenamiento local no está cifrado por la aplicación.
-- No se verifican documentos con RENIEC, no se envían correos y no se realizan pagos.
-- Para reiniciar **voluntariamente** una demostración, elimina solo `ruta-express:v1` desde DevTools → Application → Local Storage del origen. Esto elimina las reservas locales; no existe reinicio automático.
+Prueba también origen y destino iguales, datos incompletos, rutas sin salidas, recarga, filtros administrativos e impresión del boleto. Los colores, dimensiones y radios se centralizan en `shared/css/tokens.css`; el espaciado continúa usando `gap` y `padding`.
 
-## Pendiente para el 70 % restante
+## Pruebas opcionales
 
-Backend y base de datos transaccional, autenticación y roles, gestión de empleados y conductores, CRUD de buses/rutas, programación de viajes, mantenimiento, contabilidad, facturación electrónica, pagos e integraciones bancarias, notificaciones, integración documental, geolocalización y reportes avanzados. Requieren nuevas etapas y decisiones de arquitectura; no están simulados como funcionalidades operativas en este avance.
+Con Node.js, solo como herramienta de pruebas:
+
+```powershell
+node --experimental-vm-modules tests/verify.mjs
+node tests/api.mjs http://127.0.0.1:8000
+```
+
+El primer comando comprueba validaciones y CSS sin conectarse a la base. El segundo requiere PHP y MySQL activos: crea reservas ficticias y las deja anuladas, por lo que conviene ejecutarlo sobre una base exclusiva de pruebas. Puede recibir una segunda dirección de servidor PHP conectado a esa misma base para probar concurrencia entre procesos.
+
+Las variables `RUTA_DB_HOST`, `RUTA_DB_PORT`, `RUTA_DB_NAME`, `RUTA_DB_USER` y `RUTA_DB_PASSWORD` permiten que las pruebas utilicen una configuración distinta sin editar archivos. No hay instalación de paquetes ni uso de Node como backend.
+
+## Alcance y limitaciones
+
+Es un avance universitario **local**, sin autenticación ni roles operativos. Por eso la API restringe las solicitudes a la dirección local del equipo. El listado administrativo no debe publicarse en internet. La consulta pública solo devuelve una reserva cuando coinciden código y documento; el endpoint de viajes no expone pasajeros. No existe CORS abierto.
+
+No hay pagos reales, envío de correos, facturación, RENIEC, geolocalización ni administración de empleados, buses o rutas. Tampoco hay expiración automática de reservas pendientes. Las consultas SQL usan parámetros y el frontend inserta datos de usuario como texto, sin `innerHTML`.
+
+La base persiste al cerrar el navegador y no depende de un perfil. La actualización de las pantallas es periódica, no instantánea. Si MySQL o PHP se detienen, la aplicación muestra un error y no cambia a localStorage como respaldo silencioso.
+
+Para etapas posteriores quedan autenticación, permisos, CRUD administrativos, programación de viajes, historial de cambios y datos de pasajeros, pagos, reportes, despliegue y medidas de seguridad para acceso remoto.
+
+Las imágenes se sirven localmente. Sus fuentes y licencias están en `assets/img/creditos.html`; el banner generado y su prompt están documentados en `assets/img/GENERACION.md`.

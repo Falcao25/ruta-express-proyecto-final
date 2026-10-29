@@ -1,5 +1,5 @@
 import { cities } from '../../shared/data.js';
-import { initializeStorage, getTrips, getTrip, getReservations, getAvailability, getOccupiedSeats, createReservation, findReservation, subscribe } from '../../shared/storage.js';
+import { initializeStorage, refreshData, getTrips, getTrip, getReservations, getAvailability, getOccupiedSeats, createReservation, findReservation, subscribe } from '../../shared/storage.js';
 import { el, money, formatDate, today, localDate, isUpcoming, badge, emptyState, definitionList, setMessage, showErrors, clearErrors, validateSearch, validatePassenger } from '../../shared/utils.js';
 
 const $ = selector => document.querySelector(selector);
@@ -16,8 +16,8 @@ let lookupCredentials = null;
 let submitting = false;
 
 function safely(action) {
-  return (...args) => {
-    try { return action(...args); }
+  return async (...args) => {
+    try { return await action(...args); }
     catch (error) { setMessage($('#app-notice'), error.message); }
   };
 }
@@ -61,8 +61,10 @@ function tripCard(trip) {
     el('div', { className: 'trip-card__price' }, [el('strong', { text: money(trip.precio) }), el('button', { type: 'button', className: 'btn btn--primary', disabled: available === 0, 'aria-label': `Seleccionar salida de ${trip.horaSalida}, ${money(trip.precio)}`, onclick: safely(() => selectTrip(trip)) }, available ? 'Elegir viaje →' : 'Agotado')]),
   ]);
 }
-function selectTrip(trip) {
-  activeTrip = trip;
+async function selectTrip(trip) {
+  await refreshData();
+  activeTrip = getTrip(trip.id);
+  if (!activeTrip || !isUpcoming(activeTrip)) throw new Error('Esta salida ya no está disponible. Busca otro viaje.');
   selectedSeat = null;
   reviewPassenger = null;
   passengerForm.reset();
@@ -146,6 +148,7 @@ async function confirmBooking() {
     navigate('boleto');
   } catch (error) {
     setMessage($('#review-error'), error.message);
+    await refreshData().catch(() => {});
     renderSeats();
     renderSummary();
   } finally {
@@ -169,14 +172,16 @@ function makeTicket(reservation) {
 function renderTicket() {
   if (!currentReservation) return;
   currentReservation = getReservations().find(r => r.id === currentReservation.id) || null;
-  if (!currentReservation) { $('#ticket-container').replaceChildren(emptyState('Reserva no disponible', 'Los datos locales cambiaron. Realiza una nueva consulta.')); return; }
+  if (!currentReservation) { $('#ticket-container').replaceChildren(emptyState('Reserva no disponible', 'La información del servidor cambió. Realiza una nueva consulta.')); return; }
   $('#ticket-container').replaceChildren(makeTicket(currentReservation));
-  $('#confirmation-title').textContent = currentReservation.estado === 'cancelada' ? 'Tu reserva está cancelada' : '¡Tu reserva está lista!';
+  $('#confirmation-title').textContent = currentReservation.estado === 'anulada' ? 'Tu reserva está anulada' : '¡Tu reserva está lista!';
   $('.confirmation-heading > p').textContent = currentReservation.estado === 'pendiente' ? 'Está pendiente de confirmación por la empresa. No has realizado ningún pago.' : currentReservation.estado === 'confirmada' ? 'La empresa confirmó tu reserva. Esta demostración no registra pagos.' : 'El asiento ha sido liberado. Puedes realizar una nueva reserva.';
 }
-function renderLookup() {
+async function renderLookup() {
   if (!lookupCredentials) return;
-  const reservation = findReservation(lookupCredentials.codigo, lookupCredentials.documento);
+  const credentials = lookupCredentials;
+  const reservation = await findReservation(credentials.codigo, credentials.documento);
+  if (lookupCredentials !== credentials) return;
   if (!reservation) { $('#lookup-result').replaceChildren(emptyState('No encontramos la reserva', 'Verifica el código y el documento del pasajero e inténtalo nuevamente.')); return; }
   $('#lookup-result').replaceChildren(makeTicket(reservation), el('div', { className: 'actions ticket-actions' }, [el('button', { className: 'btn btn--secondary', type: 'button', onclick: () => { currentReservation = reservation; renderTicket(); navigate('boleto'); } }, 'Ver boleto e imprimir ↗')]));
 }
@@ -193,13 +198,14 @@ try {
   $('#departure-date').value = localDate(tomorrow);
   $('#origin').value = 'Piura';
   $('#destination').value = 'Chiclayo';
-  searchForm.addEventListener('submit', safely(event => {
+  searchForm.addEventListener('submit', safely(async event => {
     event.preventDefault();
     $('#departure-date').min = today();
     const values = Object.fromEntries(new FormData(searchForm));
     const errors = validateSearch(values);
     showErrors(searchForm, errors);
     if (Object.keys(errors).length) { $('#results-section').hidden = true; return; }
+    await refreshData();
     lastSearch = values;
     renderResults(true);
   }));
@@ -224,16 +230,16 @@ try {
     if (!values.documento.trim()) errors.documento = 'Ingresa el documento del pasajero.';
     showErrors(lookupForm, errors);
     if (Object.keys(errors).length) { lookupCredentials = null; $('#lookup-result').replaceChildren(); return; }
-    lookupCredentials = values; renderLookup();
+    lookupCredentials = values; return renderLookup();
   }));
   // Remove stale results as soon as either lookup credential changes.
   lookupForm.addEventListener('input', () => { lookupCredentials = null; $('#lookup-result').replaceChildren(); });
   window.addEventListener('hashchange', safely(route));
-  subscribe(safely(() => {
+  subscribe(safely(async () => {
     renderResults();
     if (activeTrip && !submitting) { renderSeats(); renderSummary(); }
-    renderTicket(); renderLookup();
-  }));
+    renderTicket(); await renderLookup();
+  }), error => setMessage($('#app-notice'), error.message));
   route();
 } catch (error) {
   setMessage($('#app-notice'), error.message);

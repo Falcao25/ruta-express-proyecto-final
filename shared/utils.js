@@ -15,7 +15,9 @@ export const formatDate = (value) =>
 export const titleCase = (value) =>
   value.charAt(0).toUpperCase() + value.slice(1);
 export const isUpcoming = (trip) =>
-  new Date(`${trip.fecha}T${trip.horaSalida}:00`).getTime() > Date.now();
+  (!trip.estado || trip.estado === 'Programado') &&
+  (!trip.estadoVehiculo || trip.estadoVehiculo === 'Operativo') &&
+  new Date(`${trip.fecha}T${trip.horaSalida}:00-05:00`).getTime() > Date.now();
 
 // User values always enter the DOM as text nodes, never parsed HTML.
 export function el(tag, attributes = {}, children = []) {

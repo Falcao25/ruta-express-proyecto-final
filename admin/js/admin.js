@@ -113,16 +113,16 @@ function reservationActions(reservation, includeDetail = true) {
         "Confirmar",
       ),
     );
-  if (reservation.estado !== "cancelada")
+  if (reservation.estado !== "anulada")
     buttons.push(
       el(
         "button",
         {
           type: "button",
           className: "btn btn--text",
-          onclick: safely(() => askAction(reservation.id, "cancelada")),
+          onclick: safely(() => askAction(reservation.id, "anulada")),
         },
-        "Cancelar",
+        "Anular",
       ),
     );
   return el("div", { className: "actions" }, buttons);
@@ -194,7 +194,7 @@ function renderDashboard() {
     ["Total de reservas", stats.total, "Todas las solicitudes", "▧", true],
     ["Pendientes", stats.pendiente, "Por revisar", "◷"],
     ["Confirmadas", stats.confirmada, "Listas para viajar", "✓"],
-    ["Canceladas", stats.cancelada, "Asientos liberados", "⊘"],
+    ["Anuladas", stats.anulada, "Asientos liberados", "⊘"],
     ["Viajes disponibles", stats.viajes, "Futuros y con asientos", "↗"],
   ];
   $("#stats-grid").replaceChildren(
@@ -268,7 +268,7 @@ function renderTrips() {
       trips.map((trip) => {
         const occupied = trip.reservados;
         return el("tr", {}, [
-          cell(trip.id, "code"),
+          cell(trip.codigo || trip.id, "code"),
           cell(trip.origen),
           cell(trip.destino),
           cell(formatDate(trip.fecha)),
@@ -328,7 +328,7 @@ function renderTripDetail(id) {
   const trip = getTrip(id);
   if (!trip) {
     $("#detail-content").replaceChildren(
-      emptyState("Viaje no disponible", "Los datos locales cambiaron."),
+      emptyState("Viaje no disponible", "La información del servidor cambió."),
     );
     return;
   }
@@ -401,7 +401,7 @@ function renderReservationDetail(id) {
   detailDialog.classList.remove("detail-dialog--trip");
   if (!reservation) {
     $("#detail-content").replaceChildren(
-      emptyState("Reserva no disponible", "Los datos locales cambiaron."),
+      emptyState("Reserva no disponible", "La información del servidor cambió."),
     );
     $("#detail-actions").replaceChildren();
     return;
@@ -451,12 +451,12 @@ function askAction(id, status) {
   const reservation = getReservations().find((r) => r.id === id);
   if (!reservation) throw new Error("La reserva ya no existe.");
   pendingAction = { id, status };
-  const cancel = status === "cancelada";
+  const cancel = status === "anulada";
   $("#action-title").textContent = cancel
-    ? "¿Cancelar esta reserva?"
+    ? "¿Anular esta reserva?"
     : "¿Confirmar esta reserva?";
   $("#action-description").textContent = cancel
-    ? "El asiento se liberará para nuevas reservas. Una reserva cancelada no puede volver a confirmarse."
+    ? "El asiento se liberará para nuevas reservas. Una reserva anulada no puede volver a confirmarse."
     : "La reserva pasará a confirmada y conservará su asiento. Esta acción no registra un pago.";
   $("#action-summary").replaceChildren(
     definitionList([
@@ -472,7 +472,7 @@ function askAction(id, status) {
   $("#apply-action").className =
     `btn ${cancel ? "btn--danger" : "btn--primary"}`;
   $("#apply-action").textContent = cancel
-    ? "Sí, cancelar reserva"
+    ? "Sí, anular reserva"
     : "Sí, confirmar reserva";
   setMessage($("#action-error"), "");
   actionDialog.showModal();
@@ -488,7 +488,7 @@ async function applyAction() {
     pendingAction = null;
     setMessage(
       $("#admin-notice"),
-      `Reserva ${reservation.codigo} ${status}. ${status === "cancelada" ? "El asiento fue liberado." : "El asiento se mantiene reservado."}`,
+      `Reserva ${reservation.codigo} ${status}. ${status === "anulada" ? "El asiento fue liberado." : "El asiento se mantiene reservado."}`,
       "success",
     );
   } catch (error) {
@@ -508,7 +508,7 @@ function refresh() {
   }
 }
 try {
-  await initializeStorage();
+  await initializeStorage('admin');
   $("#header-date").textContent = new Intl.DateTimeFormat("es-PE", {
     day: "numeric",
     month: "long",
@@ -517,7 +517,7 @@ try {
   refresh();
   route();
   window.addEventListener("hashchange", safely(route));
-  subscribe(safely(refresh));
+  subscribe(safely(refresh), error => setMessage($('#admin-notice'), error.message));
   $(".dashboard-banner a").addEventListener(
     "click",
     safely(() => {
