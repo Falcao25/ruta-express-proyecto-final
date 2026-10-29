@@ -1,0 +1,29 @@
+.login-layout { min-height: 100dvh; display: flex; }
+.login-story { display: flex; flex: 1; flex-direction: column; justify-content: space-between; gap: var(--space-12); padding: var(--space-12); background: var(--gradient-hero), url('../../assets/img/ruta-express-hero.png') center / cover; color: var(--color-surface); }
+.login-story .brand__mark { background: var(--color-brand-orange); }
+.login-story__copy { display: flex; flex-direction: column; gap: var(--space-6); max-width: 480px; }
+.login-story__copy h1 { font-size: clamp(2rem, 3.8vw, 3.5rem); line-height: 1.1; }
+.login-story__copy p, .login-story__footer { color: var(--color-white-soft); font-size: var(--font-sm); }
+.login-story__footer { font-size: var(--font-xs); }
+.login-content { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-12); padding: var(--space-12); background: var(--color-surface); }
+.login-card { display: flex; flex-direction: column; gap: var(--space-8); width: 100%; max-width: 420px; }
+.login-card h2 { font-size: var(--font-2xl); }
+.login-back { display: inline-flex; align-self: flex-start; align-items: center; min-height: var(--control-height); color: var(--color-text-muted); font-size: var(--font-xs); }
+.login-back:hover { color: var(--color-primary); }
+.login-kicker { color: var(--color-orange-ink); }
+.password-field { display: flex; align-items: center; gap: var(--space-2); }
+.password-field input { flex: 1; }
+.password-field .btn { flex-shrink: 0; padding-inline: var(--space-3); font-size: var(--font-xs); }
+.login-note { color: var(--color-text-muted); font-size: var(--font-xs); border-top: var(--border); padding-block-start: var(--space-6); }
+.login-copyright { color: var(--color-text-muted); font-size: var(--font-2xs); text-align: center; }
+@media (max-width: 900px) { .login-story { flex: .8; padding: var(--space-8); } .login-content { padding: var(--space-8); } }
+@media (max-width: 650px) {
+  .login-layout { flex-direction: column; }
+  .login-story { flex: auto; padding: var(--space-6); gap: var(--space-8); }
+  .login-story__copy { gap: var(--space-3); }
+  .login-story__copy h1 { font-size: var(--font-2xl); }
+  .login-story__copy p, .login-story__footer { display: none; }
+  .login-content { flex: auto; padding: var(--space-8) var(--space-6); gap: var(--space-8); }
+  .login-card { gap: var(--space-6); }
+  .login-card h2 { font-size: var(--font-xl); }
+}

@@ -6,6 +6,7 @@ if (PHP_SAPI !== 'cli') {
 }
 require_once dirname(__DIR__) . '/api/conexion.php';
 require_once __DIR__ . '/datos-demo.php';
+require_once __DIR__ . '/admin-inicial.php';
 
 try {
     $config = require __DIR__ . '/../api/config.php';
@@ -50,10 +51,12 @@ try {
     }
     $conexion->beginTransaction();
     cargarDatosDemo($conexion);
+    $archivoAcceso = prepararAdminInicial($conexion);
     $conexion->commit();
     echo "Base preparada: " . $config['base'] . PHP_EOL;
     echo "Viajes de ejemplo disponibles para hoy y los próximos 20 días." . PHP_EOL;
     echo "No se borraron reservas ni se registraron pagos." . PHP_EOL;
+    if ($archivoAcceso) echo 'Acceso administrativo creado. Revisa: ' . $archivoAcceso . PHP_EOL;
     $antiguas = $conexion->query('SELECT COUNT(*) FROM Reservas WHERE asiento IS NULL OR codigo IS NULL')->fetchColumn();
     if ($antiguas) {
         echo "Atención: hay " . $antiguas . " reservas antiguas sin código o asiento. Deben completarse antes de utilizarlas en la interfaz." . PHP_EOL;

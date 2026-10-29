@@ -1,4 +1,5 @@
 import { isUpcoming, validatePassenger } from './utils.js';
+import { consultarSesion, pedirAdmin, irAlLogin } from './auth.js';
 
 // Estos arreglos son solo una copia para dibujar la interfaz. Los datos se guardan en MySQL.
 let viajes = [];
@@ -11,6 +12,7 @@ const listeners = new Set();
 const apiUrl = new URL('../api/', import.meta.url);
 
 async function pedir(archivo, datos = null) {
+  if (archivo === 'reservas.php' || archivo === 'estado-reserva.php') return pedirAdmin(archivo, datos);
   let respuesta;
   try {
     respuesta = await fetch(new URL(archivo, apiUrl), {
@@ -38,6 +40,10 @@ function recordar(reserva) {
 
 export async function initializeStorage(modo = 'cliente') {
   modoAdmin = modo === 'admin';
+  if (modoAdmin && !await consultarSesion()) {
+    irAlLogin();
+    throw new Error('Inicia sesión para acceder a administración.');
+  }
   viajes = (await pedir('viajes.php')).viajes;
   if (modoAdmin) reservas = (await pedir('reservas.php')).reservas;
 }

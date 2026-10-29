@@ -19,6 +19,7 @@ import {
   definitionList,
   setMessage,
 } from "../../shared/utils.js";
+import { getUsuario, consultarSesion, cerrarSesion, irAlLogin, renovarActividad } from '../../shared/auth.js';
 
 const $ = (selector) => document.querySelector(selector);
 let detail = null;
@@ -509,6 +510,34 @@ function refresh() {
 }
 try {
   await initializeStorage('admin');
+  const usuario = getUsuario();
+  $('#session-username').textContent = usuario.username;
+  $('#session-role').textContent = usuario.rol;
+  document.querySelectorAll('.profile-avatar').forEach(avatar => {
+    avatar.textContent = usuario.username.slice(0, 2).toUpperCase();
+    avatar.setAttribute('aria-label', usuario.username);
+  });
+  $('#logout-button').addEventListener('click', async event => {
+    event.currentTarget.disabled = true;
+    try { await cerrarSesion(); }
+    catch (error) { setMessage($('#admin-notice'), error.message); $('#logout-button').disabled = false; }
+  });
+  let ultimaActividad = 0;
+  const registrarActividad = () => {
+    if (Date.now() - ultimaActividad < 60000) return;
+    ultimaActividad = Date.now();
+    renovarActividad().catch(error => setMessage($('#admin-notice'), error.message));
+  };
+  window.addEventListener('pointerdown', registrarActividad);
+  window.addEventListener('keydown', registrarActividad);
+  window.addEventListener('pageshow', async event => {
+    if (!event.persisted) return;
+    $('.admin-layout').hidden = true;
+    try {
+      if (await consultarSesion()) $('.admin-layout').hidden = false;
+      else irAlLogin();
+    } catch { irAlLogin(); }
+  });
   $("#header-date").textContent = new Intl.DateTimeFormat("es-PE", {
     day: "numeric",
     month: "long",

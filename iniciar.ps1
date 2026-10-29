@@ -34,7 +34,7 @@ Set-Location -LiteralPath $webDirectory
 & $phpExecutable database/instalar.php
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 Write-Host 'Cliente: http://127.0.0.1:8000/cliente/index.html'
-Write-Host 'Administrador: http://127.0.0.1:8000/admin/index.html'
+Write-Host 'Administrador: http://127.0.0.1:8000/admin/index.php'
 Write-Host 'Para detener el servidor presiona Ctrl+C.'
 $serverProcess = Start-Process -FilePath $phpExecutable -ArgumentList @('-S', '127.0.0.1:8000', 'router.php') -WorkingDirectory $webDirectory -WindowStyle Hidden -PassThru
 try {

@@ -16,11 +16,11 @@ Los arreglos en `shared/storage.js` son una copia temporal para dibujar la panta
 
 ## Requisitos
 
-- PHP con las extensiones `pdo_mysql` y `mbstring` (incluidas en XAMPP).
+- PHP 7.3 o superior con las extensiones `pdo_mysql` y `mbstring` (incluidas en XAMPP).
 - MySQL o MariaDB iniciado.
 - Navegador actual.
 
-La implementación se comprobó con PHP 7.1 y MariaDB 10.4. No requiere Node.js para funcionar. No abras el proyecto con Live Server ni con doble clic: esos métodos no ejecutan PHP.
+La versión con login se comprobó con PHP 8.4 y MySQL. No requiere Node.js para funcionar. No abras el proyecto con Live Server ni con doble clic: esos métodos no ejecutan PHP.
 
 ## Iniciar en Windows
 
@@ -45,7 +45,7 @@ Si existe una instalación de PHP en `%LOCALAPPDATA%\RutaExpress\php`, el script
 Abre:
 
 - Cliente: **http://127.0.0.1:8000/cliente/index.html**
-- Administrador: **http://127.0.0.1:8000/admin/index.html**
+- Administrador: **http://127.0.0.1:8000/admin/index.php**
 
 También puedes entrar por `/cliente` o `/admin`: `router.php` agrega la barra final para que sus estilos y módulos carguen desde la carpeta correcta. Los archivos inexistentes responden con 404, sin devolver la página principal como si fuera CSS o JavaScript.
 
@@ -61,7 +61,25 @@ Puedes copiar la carpeta del proyecto a `C:\xampp\htdocs\ruta-express`, configur
 C:\xampp\php\php.exe database\instalar.php
 ```
 
-Después inicia Apache y abre `http://localhost/ruta-express/cliente/index.html` y `http://localhost/ruta-express/admin/index.html`. Si Apache usa otro puerto, inclúyelo en la dirección.
+Después inicia Apache y abre `http://localhost/ruta-express/cliente/index.html` y `http://localhost/ruta-express/admin/index.php`. Si Apache usa otro puerto, inclúyelo en la dirección.
+
+## Login administrativo
+
+El panel requiere iniciar sesión con una cuenta de la tabla `Usuarios` cuyo rol sea **Administrador**. El rol Asesor no tiene acceso a este panel en este avance. No se agregaron tablas nuevas.
+
+La primera vez que se ejecuta el instalador se crea el usuario **`admin`**, si todavía no existe. Su contraseña es aleatoria y se guarda, para que puedas consultarla, en:
+
+```text
+%LOCALAPPDATA%\RutaExpress\acceso-inicial.txt
+```
+
+Ese archivo queda fuera de la carpeta web. La contraseña se almacena como hash en MySQL; no se incorpora al código, no se guarda en localStorage ni se muestra en el formulario. El instalador no cambia la contraseña de una cuenta `admin` existente. No confundas estas credenciales con las de conexión a MySQL.
+
+Entra por `/admin/` o `/admin/index.php`: si no hay sesión se mostrará el formulario de acceso. `admin/index.html` conserva un enlace de compatibilidad hacia la página PHP. El panel muestra el usuario conectado y tiene un botón **Cerrar sesión**.
+
+Se utilizan sesiones PHP con cookies HttpOnly y SameSite, renovación del identificador al ingresar, vencimiento por 30 minutos de inactividad y un token CSRF para las acciones administrativas. El listado de reservas y sus cambios de estado comprueban la sesión en el servidor. Una sesión eliminada o vencida deja de tener acceso aunque se intente llamar directamente a la API. Después de cinco intentos fallidos se aplica una pausa de un minuto para esa sesión; es una protección básica, no un límite global de intentos.
+
+La búsqueda, la creación de reservas del cliente y su consulta por código más documento siguen siendo públicas. Referencias: [verificación de contraseñas de PHP](https://www.php.net/manual/en/function.password-verify.php) y [sesiones PHP](https://www.php.net/manual/en/book.session.php).
 
 ### Si falla la conexión
 
@@ -85,15 +103,20 @@ api/
   consultar-reserva.php       Consulta con código y documento
   guardar-reserva.php         Creación de reserva
   estado-reserva.php          Confirmar o anular
+  autenticacion.php           Sesión, rol y comprobación del token CSRF
+  sesion.php                  Estado de la sesión
+  login.php / logout.php      Ingreso y cierre de sesión
 database/
   esquema-original.sql       SQL proporcionado al inicio
   esquema.sql                Versión adaptada para la aplicación
   instalar.php               Crea campos faltantes y carga datos de prueba
   datos-demo.php             Cinco rutas y salidas durante 21 días
+  admin-inicial.php           Creación de la cuenta administrativa inicial
 cliente/                     HTML, CSS y JavaScript de la web pública
-admin/                       HTML, CSS y JavaScript del panel
+admin/                       Panel protegido index.php y formulario login.php
 shared/
   storage.js                 Comunicación con PHP y copia de datos en memoria
+  auth.js                    Comunicación del login y sesión administrativa
   data.js                    Opciones de ciudades
   utils.js                   Formatos, DOM y validaciones de frontend
   css/                       Reset, tokens, layout, utilidades y componentes
@@ -119,7 +142,7 @@ Campos agregados para mantener el flujo existente:
 
 El instalador también puede ejecutarse después de importar el esquema original: agrega solo los campos faltantes. Si la base original ya tiene reservas sin número de asiento o código, informa de ello; esos datos deben completarse manualmente, ya que no se puede deducir qué asiento se había reservado. No inventa asientos para datos históricos.
 
-Hay un usuario `demo_local` con contraseña aleatoria guardada como hash para cumplir la relación de `Viajes.usuarioID`. No es un inicio de sesión. Los vehículos y rutas de ejemplo solo se consultan; no se implementan sus CRUD.
+Hay un usuario `demo_local` con contraseña aleatoria guardada como hash para cumplir la relación de `Viajes.usuarioID`. La cuenta de ingreso al panel es `admin`, creada por separado. Los vehículos y rutas de ejemplo solo se consultan; no se implementan sus CRUD.
 
 Los datos de ejemplo se generan para hoy y los próximos 20 días, con salidas a las 09:00 y 21:00. Al volver a ejecutar el instalador agrega fechas faltantes sin duplicar los códigos de viaje. Las fechas del backend corresponden a **America/Lima**. `Pagos` queda creada para una etapa posterior y no recibe registros de la aplicación.
 
@@ -145,7 +168,7 @@ Para evitar dos reservas activas del mismo asiento, la creación usa una **trans
 4. Usa datos ficticios: DNI `12345678`, Juan Pérez, celular `987654321`, correo `juan@example.com`.
 5. Revisa y confirma la reserva. Guarda el código mostrado en el boleto.
 6. Recarga y entra a **Mis reservas**. Consulta con código y DNI. Prueba también un DNI incorrecto.
-7. En administrador, busca el código y confirma la reserva mediante el diálogo.
+7. En administrador, inicia sesión, busca el código y confirma la reserva mediante el diálogo.
 8. Comprueba que el cliente muestre Confirmada después de la actualización.
 9. Anula la reserva. Comprueba el estado Anulada y vuelve a buscar el viaje: el asiento debe estar libre.
 10. En phpMyAdmin o tu cliente SQL consulta `Reservas` y `Clientes` para verificar que los datos existen realmente en la base. `Pagos` debe seguir sin registros de estas operaciones.
@@ -161,18 +184,18 @@ node --experimental-vm-modules tests/verify.mjs
 node tests/api.mjs http://127.0.0.1:8000
 ```
 
-El primer comando comprueba validaciones y CSS sin conectarse a la base. El segundo requiere PHP y MySQL activos: crea reservas ficticias y las deja anuladas, por lo que conviene ejecutarlo sobre una base exclusiva de pruebas. Puede recibir una segunda dirección de servidor PHP conectado a esa misma base para probar concurrencia entre procesos.
+El primer comando comprueba validaciones y CSS sin conectarse a la base. El segundo requiere PHP y MySQL activos: crea reservas ficticias y las deja anuladas, por lo que conviene ejecutarlo sobre una base exclusiva de pruebas. Inicia sesión con el acceso inicial del archivo local o con `RUTA_TEST_USER` y `RUTA_TEST_PASSWORD` si se proporcionan como variables de entorno. Comprueba acceso sin sesión, login, token CSRF, cambios de estado y logout. Puede recibir una segunda dirección de servidor PHP conectado a esa misma base para probar concurrencia entre procesos.
 
 Las variables `RUTA_DB_HOST`, `RUTA_DB_PORT`, `RUTA_DB_NAME`, `RUTA_DB_USER` y `RUTA_DB_PASSWORD` permiten que las pruebas utilicen una configuración distinta sin editar archivos. No hay instalación de paquetes ni uso de Node como backend.
 
 ## Alcance y limitaciones
 
-Es un avance universitario **local**, sin autenticación ni roles operativos. Por eso la API restringe las solicitudes a la dirección local del equipo. El listado administrativo no debe publicarse en internet. La consulta pública solo devuelve una reserva cuando coinciden código y documento; el endpoint de viajes no expone pasajeros. No existe CORS abierto.
+Es un avance universitario **local**, con autenticación para el panel administrativo. La API sigue restringiendo las solicitudes a la dirección local del equipo. El sistema no está preparado para publicarse en internet. La consulta pública solo devuelve una reserva cuando coinciden código y documento; el endpoint de viajes no expone pasajeros. No existe CORS abierto.
 
 No hay pagos reales, envío de correos, facturación, RENIEC, geolocalización ni administración de empleados, buses o rutas. Tampoco hay expiración automática de reservas pendientes. Las consultas SQL usan parámetros y el frontend inserta datos de usuario como texto, sin `innerHTML`.
 
 La base persiste al cerrar el navegador y no depende de un perfil. La actualización de las pantallas es periódica, no instantánea. Si MySQL o PHP se detienen, la aplicación muestra un error y no cambia a localStorage como respaldo silencioso.
 
-Para etapas posteriores quedan autenticación, permisos, CRUD administrativos, programación de viajes, historial de cambios y datos de pasajeros, pagos, reportes, despliegue y medidas de seguridad para acceso remoto.
+Para etapas posteriores quedan administración de usuarios, recuperación y cambio de contraseñas, permisos detallados por módulo, acceso de asesores, CRUD administrativos, programación de viajes, historial de cambios y datos de pasajeros, pagos, reportes, despliegue y medidas de seguridad para acceso remoto.
 
 Las imágenes se sirven localmente. Sus fuentes y licencias están en `assets/img/creditos.html`; el banner generado y su prompt están documentados en `assets/img/GENERACION.md`.

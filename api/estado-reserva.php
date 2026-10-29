@@ -1,14 +1,16 @@
 <?php
 require_once __DIR__ . '/funciones.php';
+require_once __DIR__ . '/autenticacion.php';
 $conexion = iniciarPeticion('POST');
-$datos = leerJson();
-$reservaID = filter_var($datos['id'] ?? null, FILTER_VALIDATE_INT);
-$estados = ['confirmada' => 'Confirmada', 'anulada' => 'Anulada'];
-$estado = is_string($datos['estado'] ?? null) ? ($estados[$datos['estado']] ?? null) : null;
-if (!$reservaID || !$estado) {
-    responder(['error' => 'Selecciona una reserva y un estado válidos.'], 422);
-}
 try {
+    exigirAdministrador($conexion, true);
+    $datos = leerJson();
+    $reservaID = filter_var($datos['id'] ?? null, FILTER_VALIDATE_INT);
+    $estados = ['confirmada' => 'Confirmada', 'anulada' => 'Anulada'];
+    $estado = is_string($datos['estado'] ?? null) ? ($estados[$datos['estado']] ?? null) : null;
+    if (!$reservaID || !$estado) {
+        responder(['error' => 'Selecciona una reserva y un estado válidos.'], 422);
+    }
     $conexion->beginTransaction();
     $referencia = consultar($conexion, 'SELECT viajeID FROM Reservas WHERE reservaID = ?', [$reservaID])->fetch();
     if (!$referencia) {

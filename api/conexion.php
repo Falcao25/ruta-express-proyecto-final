@@ -23,8 +23,8 @@ function responder($datos, $codigo = 200) {
     exit;
 }
 
-function iniciarPeticion($metodo) {
-    // Este avance no tiene autenticación: la API se utiliza solo desde el equipo local.
+function iniciarPeticion($metodo, $necesitaConexion = true) {
+    // La demostración sigue limitada al equipo local, incluso con login administrativo.
     if (!in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
         responder(['error' => 'Esta demostración está disponible solo en el equipo local.'], 403);
     }
@@ -35,6 +35,7 @@ function iniciarPeticion($metodo) {
     if ($metodo === 'POST' && stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== 0) {
         responder(['error' => 'Envía los datos en formato JSON.'], 415);
     }
+    if (!$necesitaConexion) return null;
     try {
         return conectar();
     } catch (PDOException $error) {

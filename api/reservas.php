@@ -1,8 +1,9 @@
 <?php
 require_once __DIR__ . '/funciones.php';
+require_once __DIR__ . '/autenticacion.php';
 $conexion = iniciarPeticion('GET');
 try {
-    // Listado administrativo local. Este avance todavía no incorpora inicio de sesión.
+    exigirAdministrador($conexion);
     responder(['reservas' => obtenerReservas($conexion)]);
 } catch (Exception $error) {
     errorServidor($conexion, $error);
