@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 390" fill="none">
+<circle cx="340" cy="140" r="105" fill="#d8e2d3"/><circle cx="408" cy="85" r="29" fill="#d8f36a"/>
+<path d="M30 265 160 90l86 118 67-104 156 161" fill="#c0cfba"/><path d="m160 90 30 42-22-8-21 16-15-13zm153 14 32 40-20-6-13 9-15-11-12 5" fill="#f8fafc"/>
+<path d="m0 280 90-101 108 101 109-86 153 86 80-37v82H0" fill="#a4b99e"/><path d="M0 333c130-46 217 17 300-17s112-32 240-2v76H0" fill="#d5e0d0"/>
+<path d="M114 390c44-48 208-58 268-78 85-29-20-34-30-42" stroke="#edf2e9" stroke-width="54"/><path d="M114 390c44-48 208-58 268-78 85-29-20-34-30-42" stroke="#a5b5a0" stroke-width="2" stroke-dasharray="12 12"/>
+<ellipse cx="265" cy="300" rx="136" ry="13" fill="#173b68" opacity=".1"/>
+<path d="M129 204q0-17 19-17h197q33 0 44 24l14 40v34q0 9-10 9H140q-11 0-11-11z" fill="#173b68"/>
+<path d="M138 205q0-9 10-9h198q24 0 34 21l7 20H138z" fill="#c4d4d8"/>
+<path d="M331 196h15q24 0 34 21l7 20h-56z" fill="#73919e"/>
+<path d="M150 196v41m35-41v41m35-41v41m35-41v41m35-41v41m31-41v41" stroke="#173b68" stroke-width="7"/>
+<path d="M129 261h274v14H129z" fill="#d8f36a"/>
+<path d="m163 252 10-7h61" stroke="#f8fafc" stroke-width="3" stroke-linecap="round"/><text x="248" y="255" fill="#fff" font-family="system-ui,sans-serif" font-size="11" font-weight="600">rutaexpress.</text>
+<path d="M360 242v43m13-39h17v17h-17" stroke="#6c879a" stroke-width="2"/><rect x="390" y="269" width="13" height="8" rx="2" fill="#fff"/>
+<circle cx="175" cy="288" r="20" fill="#172334"/><circle cx="175" cy="288" r="10" fill="#c0ccda"/><circle cx="353" cy="288" r="20" fill="#172334"/><circle cx="353" cy="288" r="10" fill="#c0ccda"/>
+<path d="M444 243v55m-15-39 15-26 15 26zm-4 19 19-30 19 30z" fill="#6b8e71" stroke="#6b8e71" stroke-width="3"/>
+<path d="M80 276v30m-13-17 13-26 13 26z" fill="#6b8e71" stroke="#6b8e71" stroke-width="3"/>
+<path d="M54 123h42m-21-21v42m378 48h24m-12-12v24" stroke="#173b68" stroke-width="2" opacity=".4"/>
+<path d="M248 65q8-9 16 0 8-9 16 0" stroke="#73917a" stroke-width="2"/>
+</svg>
