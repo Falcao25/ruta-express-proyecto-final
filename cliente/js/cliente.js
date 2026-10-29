@@ -32,7 +32,7 @@ function route() {
   if (view === 'lookup-view') $('#lookup-title').focus();
   if (view === 'booking-view') $('#booking-title').focus();
   if (view === 'ticket-view') $('#confirmation-title').focus();
-  if (view === 'home-view' && hash === 'buscar') $('#buscar').scrollIntoView({ block: 'start' });
+  if (view === 'home-view' && ['buscar', 'destinos', 'beneficios', 'como-reservar'].includes(hash)) $(`#${hash}`).scrollIntoView({ block: 'start' });
   else window.scrollTo({ top: 0, behavior: 'instant' });
 }
 function navigate(hash) {

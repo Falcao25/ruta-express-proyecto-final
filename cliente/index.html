@@ -16,59 +16,71 @@
 </head>
 <body>
   <a class="skip-link btn btn--primary" href="#main">Saltar al contenido</a>
-  <div class="announcement"><span>Conectamos destinos. Acercamos personas.</span><span class="announcement__tag">Hecho para viajar por Perú ↗</span></div>
+  <div class="announcement"><div class="container announcement__inner"><span><strong>Tu próxima historia empieza en la ruta.</strong> Descubre el Perú con nosotros.</span><a href="#buscar">Encuentra tu próxima salida <span aria-hidden="true">→</span></a></div></div>
   <header class="site-header">
     <div class="container site-header__inner">
       <a href="#inicio" class="brand" aria-label="Ruta Express, inicio"><span class="brand__mark" aria-hidden="true">r↗</span><span>ruta<span class="brand__suffix">express</span><span class="brand__dot">.</span></span></a>
       <nav aria-label="Navegación principal" class="site-nav">
         <a href="#inicio" data-nav="inicio" aria-current="page">Inicio</a>
         <a href="#buscar" data-nav="buscar">Buscar viajes</a>
+        <a href="#destinos" data-nav="destinos">Destinos</a>
+        <a href="#beneficios" data-nav="beneficios">Por qué elegirnos</a>
         <a href="#mis-reservas" data-nav="mis-reservas">Mis reservas</a>
       </nav>
-      <a href="../admin/index.html" class="admin-link">Panel administrativo <span aria-hidden="true">↗</span></a>
+      <a href="#buscar" class="btn btn--orange header-booking">Reserva tu viaje <span aria-hidden="true">↗</span></a>
     </div>
   </header>
   <main id="main">
     <div class="container" id="app-notice" role="alert" hidden></div>
     <section id="home-view">
-      <div class="container hero-shell">
-        <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-shell">
+        <section class="container hero" aria-labelledby="hero-title">
           <div class="hero__copy">
-            <span class="eyebrow">El camino también es parte del viaje</span>
-            <h1 id="hero-title">Más cerca de<br>tu próximo <span>destino.</span></h1>
-            <p>Viaja por el Perú con la tranquilidad que mereces.<br class="desktop-break"> Elige tu ruta, encuentra tu asiento y empieza a disfrutar.</p>
-            <div class="hero__trust"><span class="trust-icon" aria-hidden="true">✓</span><span>Tu viaje, a un par de clics.</span><span class="hero__trust-line" aria-hidden="true"></span><span>100% peruano</span></div>
+            <span class="hero__label"><span class="hero__label-dot" aria-hidden="true"></span> Conectamos el norte. Recorremos el Perú.</span>
+            <h1 id="hero-title">Hay destinos.<br>Y hay <span>reencuentros.</span></h1>
+            <p>Ese viaje que tienes pendiente empieza aquí.<br class="desktop-break"> Encuentra tu ruta y elige el asiento para tu próxima historia.</p>
+            <div class="hero__trust"><span class="trust-icon" aria-hidden="true">✓</span><span>Elige tu asiento</span><span class="hero__trust-line" aria-hidden="true"></span><span>Salidas de día y de noche</span></div>
           </div>
-          <div class="hero__art"><img src="../assets/img/road-journey.svg" width="540" height="390" alt="Ilustración de un bus Ruta Express recorriendo un paisaje de montañas peruanas"><span class="hero__art-caption">CADA RUTA, UNA NUEVA HISTORIA</span></div>
+          <div class="hero__signature" aria-hidden="true"><span>EL CAMINO NOS CONECTA</span><strong>rutaexpress.</strong></div>
         </section>
-      </div>
       <section class="container search-section" id="buscar" aria-labelledby="search-title">
         <div class="search-panel">
-          <div class="section-heading"><h2 id="search-title">¿A dónde nos vamos?</h2><span class="small muted">Solo ida <span aria-hidden="true">·</span> Una nueva aventura</span></div>
+          <div class="section-heading"><h2 id="search-title">Hola, ¿a dónde viajamos?</h2><span class="search-panel__type">↗ Solo ida</span></div>
           <form id="search-form" class="search-form" novalidate>
             <div class="field search-form__field"><label for="origin">Origen</label><select id="origin" name="origen" required aria-describedby="origin-error"><option value="">¿Desde dónde sales?</option></select><span class="field-error" id="origin-error"></span></div>
             <div class="field search-form__swap"><span class="field-spacer" aria-hidden="true">↔</span><button class="swap-button" type="button" id="swap-cities" aria-label="Intercambiar origen y destino">⇄</button></div>
             <div class="field search-form__field"><label for="destination">Destino</label><select id="destination" name="destino" required aria-describedby="destination-error"><option value="">¿A dónde quieres ir?</option></select><span class="field-error" id="destination-error"></span></div>
             <div class="field search-form__field"><label for="departure-date">Fecha de salida</label><input id="departure-date" type="date" name="fecha" required aria-describedby="departure-date-error"><span class="field-error" id="departure-date-error"></span></div>
             <div class="field search-form__passengers"><label for="passengers">Pasajeros</label><select id="passengers" name="pasajeros" aria-describedby="passengers-help"><option value="1">1 adulto</option></select><span class="sr-only" id="passengers-help">Una persona por reserva en esta demostración.</span></div>
-            <div class="field search-form__action"><span class="field-spacer" aria-hidden="true">Buscar</span><button type="submit" class="btn btn--primary search-form__button"><span aria-hidden="true">⌕</span> Buscar viajes <span aria-hidden="true">→</span></button></div>
+            <div class="field search-form__action"><span class="field-spacer" aria-hidden="true">Buscar</span><button type="submit" class="btn btn--orange search-form__button"><span aria-hidden="true">⌕</span> Buscar viajes <span aria-hidden="true">→</span></button></div>
           </form>
           <p class="search-panel__note"><span aria-hidden="true">ⓘ</span> Reserva sin pagos en línea. Confirma los detalles de tu viaje con la empresa.</p>
         </div>
       </section>
+      </div>
       <section id="results-section" class="container section stack" aria-labelledby="results-title" hidden>
         <div class="section-heading"><div><span class="eyebrow muted">Elige cómo quieres viajar</span><h2 id="results-title" tabindex="-1">Tus próximas salidas</h2><p class="muted small" id="results-count" role="status"></p></div><span class="badge">Precios en soles · Por persona</span></div>
         <div id="trip-results" class="stack" aria-live="polite"></div>
       </section>
-      <section class="container section stack" aria-labelledby="destinations-title">
-        <div class="section-heading"><div><span class="eyebrow muted">Tu próxima escapada</span><h2 id="destinations-title">Destinos que te esperan</h2></div><p class="muted small">Un país increíble. Muchas formas de descubrirlo.</p></div>
+      <section class="container section stack destinations-section" id="destinos" aria-labelledby="destinations-title">
+        <div class="section-heading section-heading--center"><div><span class="eyebrow section-kicker">Un país, mil motivos para viajar</span><h2 id="destinations-title">Tu próximo destino te espera</h2><p class="muted small">Vuelve a ese lugar especial. O descubre uno nuevo.</p></div></div>
         <div class="destination-grid">
-          <button class="destination-card destination-card--lima" type="button" data-origin="Trujillo" data-destination="Lima"><span class="destination-card__graphic" aria-hidden="true">◒</span><span class="destination-card__content"><span class="eyebrow">La ciudad de los reyes</span><strong>Lima</strong><span>Desde Trujillo <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde S/ 65</span></button>
-          <button class="destination-card destination-card--arequipa" type="button" data-origin="Lima" data-destination="Arequipa"><span class="destination-card__graphic" aria-hidden="true">△</span><span class="destination-card__content"><span class="eyebrow">Entre volcanes e historias</span><strong>Arequipa</strong><span>Desde Lima <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde S/ 110</span></button>
-          <button class="destination-card destination-card--trujillo" type="button" data-origin="Piura" data-destination="Trujillo"><span class="destination-card__graphic" aria-hidden="true">≋</span><span class="destination-card__content"><span class="eyebrow">Donde vive la primavera</span><strong>Trujillo</strong><span>Desde Piura <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde S/ 55</span></button>
+          <button class="destination-card destination-card--chiclayo" type="button" data-origin="Piura" data-destination="Chiclayo"><span class="destination-card__tag">La ciudad de la amistad</span><span class="destination-card__content"><span class="small">Viaja a</span><strong>Chiclayo</strong><span>Desde Piura <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde <strong>S/ 35</strong><span>Por persona</span></span></button>
+          <button class="destination-card destination-card--trujillo" type="button" data-origin="Piura" data-destination="Trujillo"><span class="destination-card__tag">Siempre es primavera</span><span class="destination-card__content"><span class="small">Viaja a</span><strong>Trujillo</strong><span>Desde Piura <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde <strong>S/ 55</strong><span>Por persona</span></span></button>
+          <button class="destination-card destination-card--lima" type="button" data-origin="Trujillo" data-destination="Lima"><span class="destination-card__tag">Entre el mar y la ciudad</span><span class="destination-card__content"><span class="small">Viaja a</span><strong>Lima</strong><span>Desde Trujillo <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde <strong>S/ 65</strong><span>Por persona</span></span></button>
+          <button class="destination-card destination-card--arequipa" type="button" data-origin="Lima" data-destination="Arequipa"><span class="destination-card__tag">Historias en la Ciudad Blanca</span><span class="destination-card__content"><span class="small">Viaja a</span><strong>Arequipa</strong><span>Desde Lima <span aria-hidden="true">↗</span></span></span><span class="destination-card__price">Desde <strong>S/ 110</strong><span>Por persona</span></span></button>
         </div>
+        <div class="destinations-action"><a class="btn btn--secondary" href="#buscar">Encuentra tu ruta <span aria-hidden="true">→</span></a><span class="muted small">5 rutas para acercarte a lo que más quieres.</span></div>
       </section>
-      <section class="benefits-section" aria-labelledby="benefits-title"><div class="container benefits-layout"><div class="benefits-intro"><span class="eyebrow muted">Viajar se siente mejor así</span><h2 id="benefits-title">Nos encargamos<br>del camino.</h2><p class="muted small">Tú solo piensa en lo que te espera al llegar.</p></div><div class="benefit"><span class="benefit__icon" aria-hidden="true">⌖</span><h3>Elige tu lugar</h3><p>Ventana o pasillo. Reserva el asiento que hace tu viaje más cómodo.</p></div><div class="benefit"><span class="benefit__icon" aria-hidden="true">↗</span><h3>Reserva fácil</h3><p>Encuentra tu salida y reserva en pocos pasos, desde donde estés.</p></div><div class="benefit"><span class="benefit__icon" aria-hidden="true">✓</span><h3>Todo a la mano</h3><p>Consulta tu reserva y lleva los detalles de tu viaje siempre contigo.</p></div></div></section>
+      <section class="travel-story" aria-labelledby="story-title"><div class="container travel-story__inner"><div class="travel-story__copy"><span class="eyebrow">Hay viajes que significan más</span><h2 id="story-title">No solo te llevamos.<br>Te acercamos.</h2><p>A un abrazo que hace falta. A una nueva oportunidad.<br class="desktop-break"> A ese lugar donde siempre quieres volver.</p><a class="btn btn--orange" href="#buscar">Empieza tu próxima historia <span aria-hidden="true">→</span></a></div><span class="travel-story__caption">El Perú se disfruta en el camino.</span></div></section>
+      <section class="benefits-section" id="beneficios" aria-labelledby="benefits-title"><div class="container stack"><div class="section-heading section-heading--center"><div><span class="eyebrow section-kicker">Pensamos en tu experiencia</span><h2 id="benefits-title">Buenas razones para viajar con nosotros</h2><p class="muted small">Desde que eliges tu ruta hasta que llegas a tu destino.</p></div></div><div class="benefits-layout">
+        <div class="benefit"><span class="benefit__icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="10" y="4" width="12" height="14" rx="3"/><path d="M7 14v9h18v-9M11 23v5m10-5v5M10 18h12"/></svg></span><h3>Tu asiento, tu elección</h3><p>Ventana o pasillo. Elige tu lugar antes de empezar el viaje.</p></div>
+        <div class="benefit"><span class="benefit__icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11"/><path d="M16 9v7l5 3"/></svg></span><h3>Horarios para ti</h3><p>Salidas de día y de noche para encontrar el momento de viajar.</p></div>
+        <div class="benefit"><span class="benefit__icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="6" y="4" width="20" height="22" rx="4"/><path d="M6 17h20M12 5v12M20 5v12M10 22h2m8 0h2M10 27v2m12-2v2"/></svg></span><h3>Viaja a tu manera</h3><p>Conoce nuestros servicios Semi cama y Cama ejecutivo.</p></div>
+        <div class="benefit"><span class="benefit__icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M9 4h14v24H9zM13 8h6m-6 16h6M13 16l2 2 4-4"/></svg></span><h3>Tu reserva a la mano</h3><p>Consulta el estado de tu viaje con tu código y documento.</p></div>
+      </div></div></section>
+      <section class="booking-guide section" id="como-reservar" aria-labelledby="guide-title"><div class="container stack"><div class="section-heading section-heading--center"><div><span class="eyebrow section-kicker">Así de sencillo</span><h2 id="guide-title">Tu próximo viaje, en tres pasos</h2></div></div><ol class="booking-guide__steps"><li><span class="booking-guide__number">01</span><div><h3>Encuentra tu salida</h3><p>Elige el origen, destino y la fecha de tu viaje.</p></div></li><li><span class="booking-guide__number">02</span><div><h3>Haz tuyo el asiento</h3><p>Escoge tu lugar y completa tus datos.</p></div></li><li><span class="booking-guide__number">03</span><div><h3>Guarda tu reserva</h3><p>Conserva tu código y consulta su confirmación.</p></div></li></ol></div></section>
+      <section class="reservation-help" aria-labelledby="help-title"><div class="container reservation-help__inner"><div><span class="eyebrow">¿Ya reservaste tu viaje?</span><h2 id="help-title">Los detalles de tu ruta, siempre contigo.</h2><p>Ten a la mano tu código de reserva y el documento del pasajero.</p></div><a class="btn btn--light" href="#mis-reservas">Consultar mi reserva <span aria-hidden="true">→</span></a></div></section>
     </section>
     <section id="booking-view" class="container section stack" aria-labelledby="booking-title" hidden>
       <div class="section-heading"><div><span class="eyebrow muted">Un paso más cerca</span><h1 id="booking-title" tabindex="-1">Haz tuyo el viaje</h1><p class="muted">Elige tu asiento y completa tus datos.</p></div><button id="back-results" class="btn btn--secondary" type="button">← Volver a los viajes</button></div>
@@ -100,7 +112,7 @@
       <div id="lookup-result" aria-live="polite"></div>
     </section>
   </main>
-  <footer class="site-footer"><div class="container site-footer__main"><a href="#inicio" class="brand"><span class="brand__mark" aria-hidden="true">r↗</span><span>ruta<span class="brand__suffix">express</span>.</span></a><p>El Perú te espera. Nosotros te llevamos.</p><a href="../admin/index.html">Acceso administrativo ↗</a></div><div class="container site-footer__bottom"><span>© <span id="current-year">2026</span> Ruta Express · Empresa ficticia</span><span>Proyecto universitario · Reservas simuladas · Sin pagos reales</span></div></footer>
+  <footer class="site-footer"><div class="container site-footer__main"><div class="site-footer__brand"><a href="#inicio" class="brand"><span class="brand__mark" aria-hidden="true">r↗</span><span>ruta<span class="brand__suffix">express</span>.</span></a><p>Conectamos destinos.<br>Acercamos personas.</p><span class="site-footer__country">Hecho para recorrer el Perú ↗</span></div><div class="site-footer__column"><h2>Planea tu viaje</h2><a href="#buscar">Buscar salidas</a><a href="#destinos">Nuestros destinos</a><a href="#beneficios">Por qué elegirnos</a></div><div class="site-footer__column"><h2>Tu reserva</h2><a href="#mis-reservas">Consultar mi reserva</a><a href="#como-reservar">Cómo reservar</a><a href="../admin/index.html">Acceso administrativo ↗</a></div><div class="site-footer__column site-footer__about"><h2>Sobre esta plataforma</h2><p>Ruta Express es una empresa ficticia creada para un proyecto universitario de transporte terrestre.</p><span class="site-footer__demo">Reservas simuladas · Sin pagos reales</span></div></div><div class="container site-footer__bottom"><span>© <span id="current-year">2026</span> Ruta Express · Todos los caminos cuentan.</span><a href="../assets/img/creditos.html">Créditos de imágenes</a><span>Proyecto universitario · Primer avance</span></div></footer>
   <dialog id="review-dialog" class="dialog" aria-labelledby="review-title"><div class="dialog__body"><div class="dialog__header"><h2 id="review-title">Revisa tu reserva</h2><button class="btn btn--text" type="button" id="close-review" aria-label="Cerrar revisión">✕</button></div><p class="muted small">Verifica tus datos antes de reservar. El asiento se comprobará nuevamente al confirmar.</p><div id="review-content"></div><div class="alert">Esta operación crea una reserva pendiente. No incluye ningún pago.</div><div id="review-error" role="alert" hidden></div><div class="actions"><button class="btn btn--primary" id="confirm-booking" type="button">Confirmar reserva</button><button class="btn btn--secondary" id="edit-booking" type="button">Seguir editando</button></div></div></dialog>
   <noscript><div class="container section"><p class="alert alert--error">Activa JavaScript para buscar viajes y gestionar reservas.</p></div></noscript>
 </body>

@@ -10,7 +10,9 @@ El avance se limita al flujo de reservas. Los viajes se precargan y se consultan
 
 ## Tecnologías
 
-HTML5 semántico, CSS3 puro, Flexbox, Grid para tarjetas y asientos, JavaScript Vanilla ES6+ con módulos y `localStorage`. Sin frameworks, paquetes de ejecución, backend, fuentes remotas ni APIs externas. Las ilustraciones SVG son locales.
+HTML5 semántico, CSS3 puro, Flexbox, Grid para tarjetas y asientos, JavaScript Vanilla ES6+ con módulos y `localStorage`. Sin frameworks, paquetes de ejecución, backend, fuentes remotas ni APIs externas. Todos los recursos visuales se sirven localmente: SVG, fotografías optimizadas de destinos y un banner conceptual generado para Ruta Express.
+
+La portada adapta patrones de sitios comerciales de transporte con identidad propia: banner panorámico, buscador destacado, tarjetas fotográficas, presentación de la experiencia de viaje, beneficios, guía y pie de página. Los acentos naranjas se centralizan en tokens compartidos; el azul conserva la identidad de ambas interfaces. La sección de consulta sustituye canales de compra o pagos que no forman parte del avance. Las fotografías tienen sus autores, fuentes y licencias en `assets/img/creditos.html`, enlazado desde el footer. El prompt del banner está en `assets/img/GENERACION.md`.
 
 ## Ejecutar
 
