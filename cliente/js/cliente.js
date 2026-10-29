@@ -139,7 +139,7 @@ async function confirmBooking() {
   try {
     // Copy selection before the shared change event refreshes seat availability.
     const seat = selectedSeat;
-    currentReservation = await createReservation({ viajeId: activeTrip.id, asiento: seat, pasajero: reviewPassenger });
+    currentReservation = await createReservation({ viajeId: activeTrip.id, asiento: seat, pasajero: reviewPassenger, version: activeTrip.version });
     reviewDialog.close();
     reviewPassenger = null;
     activeTrip = null;

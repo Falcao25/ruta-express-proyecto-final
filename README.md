@@ -1,6 +1,6 @@
 # Ruta Express
 
-Sistema de Gestión de Viajes Terrestres para un proyecto universitario. Este primer avance permite buscar viajes, reservar un asiento y gestionar las reservas desde un panel administrativo.
+Sistema de Gestión de Viajes Terrestres para un proyecto universitario. Este avance permite buscar viajes, reservar un asiento y administrar las reservas, además de agregar y editar viajes desde el panel.
 
 El frontend usa **HTML, CSS y JavaScript puro**. El backend usa **PHP con PDO** y los datos se guardan en **MySQL o MariaDB**. No utiliza frameworks, Composer, npm ni librerías de componentes.
 
@@ -103,6 +103,8 @@ api/
   consultar-reserva.php       Consulta con código y documento
   guardar-reserva.php         Creación de reserva
   estado-reserva.php          Confirmar o anular
+  opciones-viajes.php         Rutas y vehículos del formulario administrativo
+  guardar-viaje.php           Creación y edición de viajes con validaciones
   autenticacion.php           Sesión, rol y comprobación del token CSRF
   sesion.php                  Estado de la sesión
   login.php / logout.php      Ingreso y cierre de sesión
@@ -114,6 +116,7 @@ database/
   admin-inicial.php           Creación de la cuenta administrativa inicial
 cliente/                     HTML, CSS y JavaScript de la web pública
 admin/                       Panel protegido index.php y formulario login.php
+  js/viajes.js                Formulario para agregar y editar viajes
 shared/
   storage.js                 Comunicación con PHP y copia de datos en memoria
   auth.js                    Comunicación del login y sesión administrativa
@@ -160,6 +163,27 @@ Los datos de ejemplo se generan para hoy y los próximos 20 días, con salidas a
 
 Para evitar dos reservas activas del mismo asiento, la creación usa una **transacción InnoDB** y bloquea el viaje con `SELECT ... FOR UPDATE` antes de comprobar y guardar. La anulación utiliza el mismo orden de bloqueo. Esto protege las operaciones realizadas mediante estos endpoints; editar directamente las tablas puede saltarse las reglas del sistema. Referencias: [transacciones con PDO](https://www.php.net/manual/en/pdo.transactions.php) y [lecturas con bloqueo de InnoDB](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html).
 
+## Gestión de viajes
+
+En **Administrador → Viajes** encontrarás **Nuevo viaje** y el botón **Editar** de cada salida futura programada. La creación y edición utilizan las tablas existentes, sin agregar columnas ni tablas nuevas.
+
+El formulario permite seleccionar una ruta y un vehículo registrados, fecha/hora de salida, llegada estimada, servicio y precio por asiento. La capacidad se toma de `Vehiculos`. Un viaje nuevo queda Programado, sin asientos ocupados iniciales; su `usuarioID` corresponde al administrador que lo crea. El código se genera en PHP.
+
+Reglas:
+
+- Debes iniciar sesión como administrador; PHP comprueba la sesión y el token CSRF.
+- La salida debe ser futura y la llegada posterior a la salida. Los horarios son de Perú.
+- El precio debe ser positivo, con hasta dos decimales. Solo se permiten los servicios Semi cama y Cama ejecutivo.
+- El vehículo debe estar operativo y no tener otro viaje programado/en ejecución que se cruce con el horario indicado. La comprobación y el guardado bloquean el vehículo dentro de una transacción.
+- Solo se editan viajes Programados que no hayan salido. No se agregaron opciones de eliminar ni cancelar viajes.
+- Si el viaje tiene reservas pendientes o confirmadas, solo se puede cambiar el precio para nuevas reservas. Su ruta, bus, horarios y servicio quedan protegidos; el precio de las reservas anteriores se conserva.
+- No se permite cambiar a un bus cuya capacidad deje fuera asientos ocupados iniciales.
+- Cada consulta incluye una versión calculada de los datos. Si otra persona modifica el viaje mientras se edita, el guardado se rechaza y se pide reabrir el formulario. Si cambia mientras un cliente revisa una reserva, debe volver a buscar y revisar su salida antes de reservar.
+
+Los viajes creados aparecen en el cliente y en los indicadores mediante la actualización periódica. El instalador no sobrescribe los viajes editados al volver a iniciar el sistema. Las rutas y vehículos siguen siendo datos precargados; sus CRUD quedan fuera de este cambio.
+
+Para probarlo: crea una salida en un horario libre, busca su código en la tabla, edita el precio y comprueba la nueva tarifa desde el buscador del cliente. Prueba un horario ocupado para verificar el mensaje de cruce de bus. Después de reservar un asiento de esa salida, el formulario de edición solo debe habilitar el precio.
+
 ## Probar la demostración
 
 1. Inicia MySQL y ejecuta `iniciar.ps1`.
@@ -182,9 +206,12 @@ Con Node.js, solo como herramienta de pruebas:
 ```powershell
 node --experimental-vm-modules tests/verify.mjs
 node tests/api.mjs http://127.0.0.1:8000
+node tests/viajes.mjs http://127.0.0.1:8000
 ```
 
 El primer comando comprueba validaciones y CSS sin conectarse a la base. El segundo requiere PHP y MySQL activos: crea reservas ficticias y las deja anuladas, por lo que conviene ejecutarlo sobre una base exclusiva de pruebas. Inicia sesión con el acceso inicial del archivo local o con `RUTA_TEST_USER` y `RUTA_TEST_PASSWORD` si se proporcionan como variables de entorno. Comprueba acceso sin sesión, login, token CSRF, cambios de estado y logout. Puede recibir una segunda dirección de servidor PHP conectado a esa misma base para probar concurrencia entre procesos.
+
+`tests/viajes.mjs` debe ejecutarse sobre una base de pruebas: crea viajes ficticios que se conservan allí. Verifica alta, edición, errores de formulario, cruces de vehículo, cambios desactualizados, protección de viajes con reservas y conservación del precio reservado. Utiliza el acceso inicial del archivo local.
 
 Las variables `RUTA_DB_HOST`, `RUTA_DB_PORT`, `RUTA_DB_NAME`, `RUTA_DB_USER` y `RUTA_DB_PASSWORD` permiten que las pruebas utilicen una configuración distinta sin editar archivos. No hay instalación de paquetes ni uso de Node como backend.
 
@@ -196,6 +223,6 @@ No hay pagos reales, envío de correos, facturación, RENIEC, geolocalización n
 
 La base persiste al cerrar el navegador y no depende de un perfil. La actualización de las pantallas es periódica, no instantánea. Si MySQL o PHP se detienen, la aplicación muestra un error y no cambia a localStorage como respaldo silencioso.
 
-Para etapas posteriores quedan administración de usuarios, recuperación y cambio de contraseñas, permisos detallados por módulo, acceso de asesores, CRUD administrativos, programación de viajes, historial de cambios y datos de pasajeros, pagos, reportes, despliegue y medidas de seguridad para acceso remoto.
+Para etapas posteriores quedan administración de usuarios, recuperación y cambio de contraseñas, permisos detallados por módulo, acceso de asesores, CRUD de rutas y vehículos, cancelación/reprogramación de viajes con pasajeros, historial de cambios y datos de pasajeros, pagos, reportes, despliegue y medidas de seguridad para acceso remoto.
 
 Las imágenes se sirven localmente. Sus fuentes y licencias están en `assets/img/creditos.html`; el banner generado y su prompt están documentados en `assets/img/GENERACION.md`.

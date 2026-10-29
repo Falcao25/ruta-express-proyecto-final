@@ -75,9 +75,7 @@ protegerPaginaAdmin();
             <strong id="breadcrumb-current">Dashboard</strong>
           </div>
           <div class="admin-header__right">
-            <span class="environment-badge"
-              ><i aria-hidden="true"></i> Demo local</span
-            ><span id="header-date" class="small muted"></span
+            <span id="header-date" class="small muted"></span
             ><span
               class="profile-avatar"
               aria-label="Usuario conectado"
@@ -153,12 +151,10 @@ protegerPaginaAdmin();
                 <span class="eyebrow muted">Conectamos el Perú</span>
                 <h1 id="trips-title" tabindex="-1">Viajes programados</h1>
                 <p class="muted small">
-                  Consulta las salidas precargadas y la ocupación de cada bus.
+                  Programa salidas, actualiza sus datos y consulta la ocupación de cada bus.
                 </p>
               </div>
-              <span class="badge"
-                >Programación de demostración · Solo lectura</span
-              >
+              <button id="new-trip" type="button" class="btn btn--primary">+ Nuevo viaje</button>
             </div>
             <form
               id="trip-filters"
@@ -249,6 +245,31 @@ protegerPaginaAdmin();
         </main>
       </div>
     </div>
+    <dialog id="trip-form-dialog" class="dialog trip-form-dialog" aria-labelledby="trip-form-title">
+      <div class="dialog__body">
+        <div class="dialog__header"><h2 id="trip-form-title">Programar un nuevo viaje</h2><button id="trip-close" class="btn btn--text" type="button" aria-label="Cerrar formulario de viaje">✕</button></div>
+        <p class="muted small">Completa la salida con una ruta y un vehículo registrados. Los horarios corresponden a Perú. Todos los campos son obligatorios.</p>
+        <p id="trip-protection-note" class="alert" hidden>Este viaje tiene reservas activas. Solo se puede cambiar el precio para nuevas reservas; las reservas existentes conservan su tarifa.</p>
+        <div id="trip-form-error" role="alert" hidden></div>
+        <form id="trip-form" class="stack" novalidate>
+          <fieldset id="trip-fields" class="trip-form-fields">
+            <legend class="sr-only">Datos del viaje</legend>
+            <div class="field"><label for="trip-route">Ruta</label><select id="trip-route" name="rutaID" required aria-describedby="trip-route-error"><option value="">Selecciona una ruta</option></select><span id="trip-route-error" class="field-error"></span></div>
+            <div class="field"><label for="trip-vehicle">Vehículo</label><select id="trip-vehicle" name="vehiculoID" required aria-describedby="trip-vehicle-error trip-capacity"><option value="">Selecciona un vehículo</option></select><span id="trip-vehicle-error" class="field-error"></span><span id="trip-capacity" class="small muted">La capacidad se toma del vehículo seleccionado.</span></div>
+            <div class="form-row">
+              <div class="field"><label for="trip-departure">Fecha y hora de salida</label><input id="trip-departure" name="fechaSalida" type="datetime-local" step="60" required aria-describedby="trip-departure-error"><span id="trip-departure-error" class="field-error"></span></div>
+              <div class="field"><label for="trip-arrival">Llegada estimada</label><input id="trip-arrival" name="fechaLlegada" type="datetime-local" step="60" required aria-describedby="trip-arrival-error"><span id="trip-arrival-error" class="field-error"></span></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label for="trip-service">Tipo de servicio</label><select id="trip-service" name="servicio" required aria-describedby="trip-service-error"><option value="Semi cama">Semi cama</option><option value="Cama ejecutivo">Cama ejecutivo</option></select><span id="trip-service-error" class="field-error"></span></div>
+              <div class="field"><label for="trip-price">Precio por asiento (S/)</label><input id="trip-price" name="precio" type="number" min="0.01" max="999999.99" step="0.01" inputmode="decimal" placeholder="Ej. 65.00" required aria-describedby="trip-price-error"><span id="trip-price-error" class="field-error"></span></div>
+            </div>
+          </fieldset>
+          <p class="muted small">El viaje se registra como Programado. El mismo bus no puede tener dos viajes con horarios superpuestos.</p>
+          <div class="actions"><button id="trip-save" class="btn btn--primary" type="submit">Crear viaje</button><button id="trip-cancel" class="btn btn--secondary" type="button">Cancelar</button></div>
+        </form>
+      </div>
+    </dialog>
     <dialog id="detail-dialog" class="dialog" aria-labelledby="detail-title">
       <div class="dialog__body">
         <div class="dialog__header">

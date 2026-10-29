@@ -55,7 +55,7 @@ assert(viaje);
 const ocupados = new Set(viaje.asientosOcupados);
 const asiento = Array.from({ length: viaje.capacidad }, (_, i) => i + 1).find(n => !ocupados.has(n));
 const pasajero = { tipoDocumento: 'DNI', numeroDocumento: String(Math.floor(10000000 + Math.random() * 89999999)), nombres: 'Prueba', apellidos: 'Universitaria', telefono: '987654321', correo: 'prueba@example.com' };
-const datos = { viajeId: viaje.id, asiento, pasajero };
+const datos = { viajeId: viaje.id, asiento, pasajero, version: viaje.version };
 const creadas = [];
 try {
   assert.equal((await pedir('guardar-reserva.php', { ...datos, pasajero: { ...pasajero, numeroDocumento: '12' } })).status, 422);

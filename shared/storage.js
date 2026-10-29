@@ -7,6 +7,7 @@ let reservas = [];
 let modoAdmin = false;
 let actualizando = false;
 let guardando = false;
+let revision = 0;
 const consultas = new Map();
 const listeners = new Set();
 const apiUrl = new URL('../api/', import.meta.url);
@@ -52,6 +53,7 @@ export async function refreshData() {
   if (actualizando || guardando) return;
   actualizando = true;
   try {
+    const revisionAnterior = revision;
     const anteriores = JSON.stringify([viajes, reservas]);
     const nuevosViajes = (await pedir('viajes.php')).viajes;
     let nuevasReservas = [];
@@ -64,7 +66,8 @@ export async function refreshData() {
         if (resultado.reserva) nuevasReservas.push(resultado.reserva);
       }
     }
-    if (guardando) return;
+    // Una consulta que empezó antes de guardar no debe reemplazar los datos recién guardados.
+    if (guardando || revisionAnterior !== revision) return;
     viajes = nuevosViajes;
     reservas = nuevasReservas;
     if (anteriores !== JSON.stringify([viajes, reservas])) avisar();
@@ -83,12 +86,13 @@ export function getTripOverview() {
   return viajes.map(viaje => ({ ...viaje, reservados: getOccupiedSeats(viaje.id).size, disponibles: getAvailability(viaje.id) }));
 }
 
-export async function createReservation({ viajeId, asiento, pasajero }) {
+export async function createReservation({ viajeId, asiento, pasajero, version }) {
   const errores = validatePassenger(pasajero);
   if (Object.keys(errores).length) throw new Error('Revisa los datos del pasajero antes de reservar.');
   guardando = true;
+  revision++;
   try {
-    const { reserva } = await pedir('guardar-reserva.php', { viajeId, asiento, pasajero });
+    const { reserva } = await pedir('guardar-reserva.php', { viajeId, asiento, pasajero, version });
     recordar(reserva);
     consultas.set(reserva.codigo, { codigo: reserva.codigo, documento: reserva.pasajero.numeroDocumento });
     const viaje = getTrip(viajeId);
@@ -100,6 +104,7 @@ export async function createReservation({ viajeId, asiento, pasajero }) {
 
 export async function updateReservationStatus(id, estado) {
   guardando = true;
+  revision++;
   try {
     const { reserva } = await pedir('estado-reserva.php', { id, estado });
     recordar(reserva);
@@ -117,6 +122,19 @@ export async function findReservation(codigo, documento) {
   const { reserva } = await pedir('consultar-reserva.php', datos);
   if (reserva) { recordar(reserva); consultas.set(reserva.codigo, datos); }
   return reserva;
+}
+
+export const getTripOptions = () => pedirAdmin('opciones-viajes.php');
+export async function saveTrip(datos) {
+  guardando = true;
+  revision++;
+  try {
+    const { viaje } = await pedirAdmin('guardar-viaje.php', datos);
+    viajes = viajes.filter(item => item.id !== viaje.id);
+    viajes.push(viaje);
+    avisar();
+    return viaje;
+  } finally { guardando = false; }
 }
 
 export function getStatistics() {

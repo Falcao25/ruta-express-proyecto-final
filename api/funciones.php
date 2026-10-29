@@ -1,6 +1,15 @@
 <?php
 require_once __DIR__ . '/conexion.php';
 
+// Permite detectar cambios en la salida mientras una persona tiene abierto el formulario.
+function versionViaje($viaje) {
+    return hash('sha256', json_encode([
+        (int) $viaje['rutaID'], (int) $viaje['vehiculoID'], $viaje['fechaSalida'],
+        $viaje['fechaLlegada'], $viaje['servicio'], $viaje['precio'],
+        (int) $viaje['capacidad'], $viaje['estado']
+    ]));
+}
+
 function listarViajes($conexion) {
     $viajes = consultar($conexion, 'SELECT v.*, r.origen, r.destino, b.capacidad, b.estado AS estadoVehiculo
         FROM Viajes v INNER JOIN Rutas r ON r.rutaID = v.rutaID
@@ -21,6 +30,8 @@ function listarViajes($conexion) {
         $minutos = max(0, (int) (($llegada->getTimestamp() - $salida->getTimestamp()) / 60));
         $resultado[] = [
             'id' => (string) $viaje['viajeID'], 'codigo' => $viaje['codigo'],
+            'rutaID' => (string) $viaje['rutaID'], 'vehiculoID' => (string) $viaje['vehiculoID'],
+            'version' => versionViaje($viaje),
             'empresa' => 'Ruta Express', 'origen' => $viaje['origen'], 'destino' => $viaje['destino'],
             'fecha' => $salida->format('Y-m-d'), 'horaSalida' => $salida->format('H:i'),
             'fechaLlegada' => $llegada->format('Y-m-d'), 'horaLlegada' => $llegada->format('H:i'),

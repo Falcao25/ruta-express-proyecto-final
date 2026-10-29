@@ -23,7 +23,9 @@ async function solicitar(archivo, datos = null, protegido = false, actividad = f
   const resultado = await respuesta.json();
   if (!respuesta.ok) {
     if (protegido && respuesta.status === 401) irAlLogin();
-    throw new Error(resultado.error || 'No se pudo completar la solicitud.');
+    const error = new Error(resultado.error || 'No se pudo completar la solicitud.');
+    error.campos = resultado.campos || {};
+    throw error;
   }
   return resultado;
 }

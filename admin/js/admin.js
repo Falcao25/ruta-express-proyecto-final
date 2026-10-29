@@ -20,6 +20,7 @@ import {
   setMessage,
 } from "../../shared/utils.js";
 import { getUsuario, consultarSesion, cerrarSesion, irAlLogin, renovarActividad } from '../../shared/auth.js';
+import { prepararGestionViajes, abrirFormularioViaje, puedeEditarViaje } from './viajes.js';
 
 const $ = (selector) => document.querySelector(selector);
 let detail = null;
@@ -29,9 +30,9 @@ const detailDialog = $("#detail-dialog");
 const actionDialog = $("#action-dialog");
 
 function safely(action) {
-  return (...args) => {
+  return async (...args) => {
     try {
-      return action(...args);
+      return await action(...args);
     } catch (error) {
       setMessage($("#admin-notice"), error.message);
     }
@@ -234,7 +235,7 @@ function renderTrips() {
       (trip) =>
         (!values.fecha || trip.fecha === values.fecha) &&
         (values.period === "all" || isUpcoming(trip)) &&
-        `${trip.id} ${trip.origen} ${trip.destino}`
+        `${trip.codigo || trip.id} ${trip.origen} ${trip.destino}`
           .toLocaleLowerCase("es-PE")
           .includes(query),
     )
@@ -288,20 +289,22 @@ function renderTrips() {
           ),
           cell(trip.capacidad - occupied),
           cell(
-            el(
+            el('div', { className: 'actions' }, [el(
               "button",
               {
                 type: "button",
                 className: "btn btn--text",
-                "aria-label": `Ver ocupación del viaje ${trip.id}`,
+                "aria-label": `Ver ocupación del viaje ${trip.codigo || trip.id}`,
                 onclick: safely(() => openTrip(trip.id)),
               },
               "Ver ocupación ↗",
-            ),
+            ), el('button', { type: 'button', className: 'btn btn--secondary',
+              disabled: !puedeEditarViaje(trip), title: puedeEditarViaje(trip) ? 'Editar datos del viaje' : 'Solo se editan viajes programados que no han salido',
+              'aria-label': `Editar viaje ${trip.codigo || trip.id}`, onclick: safely(() => abrirFormularioViaje(trip.id)) }, 'Editar')]),
           ),
         ]);
       }),
-      "Viajes precargados y disponibilidad de asientos",
+      "Gestión de viajes y disponibilidad de asientos",
     ),
   );
 }
@@ -510,6 +513,11 @@ function refresh() {
 }
 try {
   await initializeStorage('admin');
+  prepararGestionViajes((viaje, nuevo) => {
+    if (nuevo) $('#trip-filters').reset();
+    refresh();
+    setMessage($('#admin-notice'), `Viaje ${viaje.codigo} ${nuevo ? 'creado' : 'actualizado'} correctamente.`, 'success');
+  });
   const usuario = getUsuario();
   $('#session-username').textContent = usuario.username;
   $('#session-role').textContent = usuario.rol;

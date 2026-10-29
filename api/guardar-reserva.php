@@ -25,6 +25,10 @@ try {
         $conexion->rollBack();
         responder(['error' => 'El viaje ya no está disponible. Busca una nueva salida.'], 409);
     }
+    if (!is_string($datos['version'] ?? null) || !hash_equals(versionViaje($viaje), $datos['version'])) {
+        $conexion->rollBack();
+        responder(['error' => 'Los datos del viaje cambiaron. Vuelve a buscar y revisar la salida antes de reservar.'], 409);
+    }
     if ($asiento > (int) $viaje['capacidad']) {
         $conexion->rollBack();
         responder(['error' => 'El asiento no pertenece a este bus.'], 422);
