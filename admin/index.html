@@ -1,55 +1,295 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es-PE">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Panel de gestión de viajes y reservas de Ruta Express. Demostración universitaria local.">
-  <title>Administración · Ruta Express</title>
-  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../shared/css/reset.css">
-  <link rel="stylesheet" href="../shared/css/tokens.css">
-  <link rel="stylesheet" href="../shared/css/layout.css">
-  <link rel="stylesheet" href="../shared/css/utilities.css">
-  <link rel="stylesheet" href="../shared/css/components.css">
-  <link rel="stylesheet" href="css/admin.css">
-  <script type="module" src="js/admin.js"></script>
-</head>
-<body>
-  <a class="skip-link btn btn--primary" href="#admin-main">Saltar al contenido</a>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" aria-label="Panel de administración">
-      <a href="#dashboard" class="brand"><span class="brand__mark" aria-hidden="true">r↗</span><span>ruta<span class="brand__suffix">express</span>.</span></a>
-      <div class="sidebar-workspace"><span class="workspace-avatar" aria-hidden="true">RE</span><div class="flex-col"><strong>Gestión de operaciones</strong><span>Entorno de demostración</span></div></div>
-      <div class="sidebar-navigation"><span class="eyebrow sidebar-label">Principal</span><nav class="admin-nav" aria-label="Navegación administrativa"><a href="#dashboard" data-view="dashboard" aria-current="page"><span aria-hidden="true">▦</span>Dashboard</a><a href="#viajes" data-view="viajes"><span aria-hidden="true">▤</span>Viajes</a><a href="#reservas" data-view="reservas"><span aria-hidden="true">▧</span>Reservas<span class="nav-count" id="sidebar-count">0</span></a></nav></div>
-      <div class="sidebar-bottom"><div class="sidebar-note"><span class="eyebrow">Primer avance · 30%</span><p>Las grandes rutas empiezan con una buena gestión.</p><span>Datos guardados en este navegador.</span></div><a class="sidebar-public" href="../cliente/index.html">Ir a la web del cliente <span aria-hidden="true">↗</span></a><div class="sidebar-profile"><span class="profile-avatar" aria-hidden="true">AD</span><div class="flex-col"><strong>Administrador demo</strong><span>Acceso local · Sin autenticación</span></div></div></div>
-    </aside>
-    <div class="admin-workspace">
-      <header class="admin-header"><div class="admin-breadcrumb">Operaciones <span aria-hidden="true">/</span> <strong id="breadcrumb-current">Dashboard</strong></div><div class="admin-header__right"><span class="environment-badge"><i aria-hidden="true"></i> Demo local</span><span id="header-date" class="small muted"></span><span class="profile-avatar" aria-label="Administrador de demostración">AD</span></div></header>
-      <main id="admin-main" class="admin-main">
-        <div id="admin-notice" role="alert" hidden></div>
-        <section id="dashboard-view" class="stack" aria-labelledby="dashboard-title">
-          <div class="section-heading"><div><span class="eyebrow muted">Cada viaje cuenta</span><h1 id="dashboard-title" tabindex="-1">Una vista de tu operación</h1><p class="muted small">Tus reservas y próximas salidas, en un solo lugar.</p></div><a href="#reservas" class="btn btn--primary">Gestionar reservas <span aria-hidden="true">→</span></a></div>
-          <div id="stats-grid" class="stats-grid" aria-live="polite"></div>
-          <div class="dashboard-banner"><div class="stack gap-2"><span class="eyebrow">Todo listo para el próximo destino</span><h2>Un buen viaje empieza con una reserva.</h2><p>Revisa las solicitudes pendientes y ayuda a tus pasajeros a seguir su camino.</p></div><a href="#reservas" class="btn btn--accent">Revisar pendientes →</a></div>
-          <section class="stack" aria-labelledby="recent-title"><div class="section-heading"><div><h2 id="recent-title">Últimas reservas</h2><p class="small muted">Las 5 solicitudes más recientes de tus pasajeros.</p></div><a href="#reservas" class="btn btn--text">Ver todas las reservas ↗</a></div><div id="recent-reservations"></div></section>
-          <div class="admin-footnote"><span aria-hidden="true">ⓘ</span><p>Demostración local. Los cambios se comparten entre pestañas del mismo navegador y origen. No se procesan pagos.</p></div>
-        </section>
-        <section id="viajes-view" class="stack" aria-labelledby="trips-title" hidden>
-          <div class="section-heading"><div><span class="eyebrow muted">Conectamos el Perú</span><h1 id="trips-title" tabindex="-1">Viajes programados</h1><p class="muted small">Consulta las salidas precargadas y la ocupación de cada bus.</p></div><span class="badge">Programación de demostración · Solo lectura</span></div>
-          <form id="trip-filters" class="filter-bar" role="search" aria-label="Filtrar viajes"><div class="field filter-bar__search"><label for="trip-query">Buscar ruta o código</label><input type="search" id="trip-query" name="query" placeholder="Ej. Piura, Lima o V-…" maxlength="80"></div><div class="field"><label for="trip-date">Fecha de salida</label><input type="date" id="trip-date" name="fecha"></div><div class="field"><label for="trip-period">Mostrar</label><select id="trip-period" name="period"><option value="future">Próximas salidas</option><option value="all">Todos los viajes</option></select></div><button class="btn btn--secondary" type="reset">Limpiar filtros</button></form>
-          <p class="small muted" id="trip-count" role="status"></p><div id="trips-table"></div>
-        </section>
-        <section id="reservas-view" class="stack" aria-labelledby="reservations-title" hidden>
-          <div class="section-heading"><div><span class="eyebrow muted">Acompaña cada viaje</span><h1 id="reservations-title" tabindex="-1">Gestión de reservas</h1><p class="muted small">Consulta, confirma o cancela las reservas de tus pasajeros.</p></div><a href="../cliente/index.html" class="btn btn--secondary">Abrir web del cliente ↗</a></div>
-          <form id="reservation-filters" class="filter-bar" role="search" aria-label="Filtrar reservas"><div class="field filter-bar__search"><label for="reservation-query">Buscar reserva</label><input type="search" id="reservation-query" name="query" placeholder="Código, pasajero, documento o ruta" maxlength="80"></div><div class="field"><label for="reservation-status">Estado</label><select id="reservation-status" name="estado"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="confirmada">Confirmada</option><option value="cancelada">Cancelada</option></select></div><button class="btn btn--secondary" type="reset">Limpiar filtros</button></form>
-          <p id="reservation-count" class="small muted" role="status"></p><div id="reservations-table"></div>
-        </section>
-      </main>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Panel de gestión de viajes y reservas de Ruta Express. Demostración universitaria local."
+    />
+    <title>Administración · Ruta Express</title>
+    <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../shared/css/reset.css" />
+    <link rel="stylesheet" href="../shared/css/tokens.css" />
+    <link rel="stylesheet" href="../shared/css/layout.css" />
+    <link rel="stylesheet" href="../shared/css/utilities.css" />
+    <link rel="stylesheet" href="../shared/css/components.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+    <script type="module" src="js/admin.js"></script>
+  </head>
+  <body>
+    <a class="skip-link btn btn--primary" href="#admin-main"
+      >Saltar al contenido</a
+    >
+    <div class="admin-layout">
+      <aside class="admin-sidebar" aria-label="Panel de administración">
+        <a href="#dashboard" class="brand"
+          ><span class="brand__mark" aria-hidden="true">r↗</span
+          ><span>ruta<span class="brand__suffix">express</span>.</span></a
+        >
+        <div class="sidebar-workspace">
+          <span class="workspace-avatar" aria-hidden="true">RE</span>
+          <div class="flex-col">
+            <strong>Gestión de operaciones</strong
+            ><span>Entorno de demostración</span>
+          </div>
+        </div>
+        <div class="sidebar-navigation">
+          <span class="eyebrow sidebar-label">Principal</span>
+          <nav class="admin-nav" aria-label="Navegación administrativa">
+            <a href="#dashboard" data-view="dashboard" aria-current="page"
+              ><span aria-hidden="true">▦</span>Dashboard</a
+            ><a href="#viajes" data-view="viajes"
+              ><span aria-hidden="true">▤</span>Viajes</a
+            ><a href="#reservas" data-view="reservas"
+              ><span aria-hidden="true">▧</span>Reservas<span
+                class="nav-count"
+                id="sidebar-count"
+                >0</span
+              ></a
+            >
+          </nav>
+        </div>
+        <div class="sidebar-bottom">
+          <div class="sidebar-note">
+            <span class="eyebrow">Primer avance · 30%</span>
+            <p>Las grandes rutas empiezan con una buena gestión.</p>
+            <span>Datos guardados en este navegador.</span>
+          </div>
+          <a class="sidebar-public" href="../cliente/index.html"
+            >Ir a la web del cliente <span aria-hidden="true">↗</span></a
+          >
+          <div class="sidebar-profile">
+            <span class="profile-avatar" aria-hidden="true">AD</span>
+            <div class="flex-col">
+              <strong>Administrador demo</strong
+              ><span>Acceso local · Sin autenticación</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="admin-workspace">
+        <header class="admin-header">
+          <div class="admin-breadcrumb">
+            Operaciones <span aria-hidden="true">/</span>
+            <strong id="breadcrumb-current">Dashboard</strong>
+          </div>
+          <div class="admin-header__right">
+            <span class="environment-badge"
+              ><i aria-hidden="true"></i> Demo local</span
+            ><span id="header-date" class="small muted"></span
+            ><span
+              class="profile-avatar"
+              aria-label="Administrador de demostración"
+              >AD</span
+            >
+          </div>
+        </header>
+        <main id="admin-main" class="admin-main">
+          <div id="admin-notice" role="alert" hidden></div>
+          <section
+            id="dashboard-view"
+            class="stack"
+            aria-labelledby="dashboard-title"
+          >
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow muted">Cada viaje cuenta</span>
+                <h1 id="dashboard-title" tabindex="-1">
+                  Una vista de tu operación
+                </h1>
+                <p class="muted small">
+                  Tus reservas y próximas salidas, en un solo lugar.
+                </p>
+              </div>
+              <a href="#reservas" class="btn btn--primary"
+                >Gestionar reservas <span aria-hidden="true">→</span></a
+              >
+            </div>
+            <div id="stats-grid" class="stats-grid" aria-live="polite"></div>
+            <div class="dashboard-banner">
+              <div class="stack gap-2">
+                <span class="eyebrow">Todo listo para el próximo destino</span>
+                <h2>Un buen viaje empieza con una reserva.</h2>
+                <p>
+                  Revisa las solicitudes pendientes y ayuda a tus pasajeros a
+                  seguir su camino.
+                </p>
+              </div>
+              <a href="#reservas" class="btn btn--accent"
+                >Revisar pendientes →</a
+              >
+            </div>
+            <section class="stack" aria-labelledby="recent-title">
+              <div class="section-heading">
+                <div>
+                  <h2 id="recent-title">Últimas reservas</h2>
+                  <p class="small muted">
+                    Las 5 solicitudes más recientes de tus pasajeros.
+                  </p>
+                </div>
+                <a href="#reservas" class="btn btn--text"
+                  >Ver todas las reservas ↗</a
+                >
+              </div>
+              <div id="recent-reservations"></div>
+            </section>
+            <div class="admin-footnote">
+              <span aria-hidden="true">ⓘ</span>
+              <p>
+                Demostración local. Los cambios se comparten entre pestañas del
+                mismo navegador y origen. No se procesan pagos.
+              </p>
+            </div>
+          </section>
+          <section
+            id="viajes-view"
+            class="stack"
+            aria-labelledby="trips-title"
+            hidden
+          >
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow muted">Conectamos el Perú</span>
+                <h1 id="trips-title" tabindex="-1">Viajes programados</h1>
+                <p class="muted small">
+                  Consulta las salidas precargadas y la ocupación de cada bus.
+                </p>
+              </div>
+              <span class="badge"
+                >Programación de demostración · Solo lectura</span
+              >
+            </div>
+            <form
+              id="trip-filters"
+              class="filter-bar"
+              role="search"
+              aria-label="Filtrar viajes"
+            >
+              <div class="field filter-bar__search">
+                <label for="trip-query">Buscar ruta o código</label
+                ><input
+                  type="search"
+                  id="trip-query"
+                  name="query"
+                  placeholder="Ej. Piura, Lima o V-…"
+                  maxlength="80"
+                />
+              </div>
+              <div class="field">
+                <label for="trip-date">Fecha de salida</label
+                ><input type="date" id="trip-date" name="fecha" />
+              </div>
+              <div class="field">
+                <label for="trip-period">Mostrar</label
+                ><select id="trip-period" name="period">
+                  <option value="future">Próximas salidas</option>
+                  <option value="all">Todos los viajes</option>
+                </select>
+              </div>
+              <button class="btn btn--secondary" type="reset">
+                Limpiar filtros
+              </button>
+            </form>
+            <p class="small muted" id="trip-count" role="status"></p>
+            <div id="trips-table"></div>
+          </section>
+          <section
+            id="reservas-view"
+            class="stack"
+            aria-labelledby="reservations-title"
+            hidden
+          >
+            <div class="section-heading">
+              <div>
+                <span class="eyebrow muted">Acompaña cada viaje</span>
+                <h1 id="reservations-title" tabindex="-1">
+                  Gestión de reservas
+                </h1>
+                <p class="muted small">
+                  Consulta, confirma o cancela las reservas de tus pasajeros.
+                </p>
+              </div>
+              <a href="../cliente/index.html" class="btn btn--secondary"
+                >Abrir web del cliente ↗</a
+              >
+            </div>
+            <form
+              id="reservation-filters"
+              class="filter-bar"
+              role="search"
+              aria-label="Filtrar reservas"
+            >
+              <div class="field filter-bar__search">
+                <label for="reservation-query">Buscar reserva</label
+                ><input
+                  type="search"
+                  id="reservation-query"
+                  name="query"
+                  placeholder="Código, pasajero, documento o ruta"
+                  maxlength="80"
+                />
+              </div>
+              <div class="field">
+                <label for="reservation-status">Estado</label
+                ><select id="reservation-status" name="estado">
+                  <option value="">Todos los estados</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="confirmada">Confirmada</option>
+                  <option value="cancelada">Cancelada</option>
+                </select>
+              </div>
+              <button class="btn btn--secondary" type="reset">
+                Limpiar filtros
+              </button>
+            </form>
+            <p id="reservation-count" class="small muted" role="status"></p>
+            <div id="reservations-table"></div>
+          </section>
+        </main>
+      </div>
     </div>
-  </div>
-  <dialog id="detail-dialog" class="dialog" aria-labelledby="detail-title"><div class="dialog__body"><div class="dialog__header"><h2 id="detail-title">Detalle</h2><button type="button" class="btn btn--text" id="close-detail" aria-label="Cerrar detalle">✕</button></div><div id="detail-content" class="stack"></div><div id="detail-actions" class="actions"></div></div></dialog>
-  <dialog id="action-dialog" class="dialog" aria-labelledby="action-title"><div class="dialog__body"><h2 id="action-title">Confirmar acción</h2><p id="action-description" class="muted"></p><div id="action-summary"></div><div id="action-error" role="alert" hidden></div><div class="actions"><button type="button" id="apply-action" class="btn btn--primary">Confirmar</button><button type="button" id="dismiss-action" class="btn btn--secondary" autofocus>Volver</button></div></div></dialog>
-  <noscript><p class="alert alert--error">Activa JavaScript para consultar y gestionar reservas.</p></noscript>
-</body>
-
+    <dialog id="detail-dialog" class="dialog" aria-labelledby="detail-title">
+      <div class="dialog__body">
+        <div class="dialog__header">
+          <h2 id="detail-title">Detalle</h2>
+          <button
+            type="button"
+            class="btn btn--text"
+            id="close-detail"
+            aria-label="Cerrar detalle"
+          >
+            ✕
+          </button>
+        </div>
+        <div id="detail-content" class="stack"></div>
+        <div id="detail-actions" class="actions"></div>
+      </div>
+    </dialog>
+    <dialog id="action-dialog" class="dialog" aria-labelledby="action-title">
+      <div class="dialog__body">
+        <h2 id="action-title">Confirmar acción</h2>
+        <p id="action-description" class="muted"></p>
+        <div id="action-summary"></div>
+        <div id="action-error" role="alert" hidden></div>
+        <div class="actions">
+          <button type="button" id="apply-action" class="btn btn--primary">
+            Confirmar</button
+          ><button
+            type="button"
+            id="dismiss-action"
+            class="btn btn--secondary"
+            autofocus
+          >
+            Volver
+          </button>
+        </div>
+      </div>
+    </dialog>
+    <noscript
+      ><p class="alert alert--error">
+        Activa JavaScript para consultar y gestionar reservas.
+      </p></noscript
+    >
+  </body>
 </html>
